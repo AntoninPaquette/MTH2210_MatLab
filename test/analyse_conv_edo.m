@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Script effectuant l'analyse de convergence des méthodes de Runge-Kutta
+% Script effectuant l'analyse de convergence des mï¿½thodes de Runge-Kutta
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -8,13 +8,13 @@ clc
 close all
 
 
-%% Définition des paramètres pour l'analyse de convergence
+%% Dï¿½finition des paramï¿½tres pour l'analyse de convergence
 nb_eval			=	10;
 nb_pas_init		=	100;
 nb_pas			=	2.^(0:nb_eval-1) * nb_pas_init;
 
 
-%% Définition du problème avec sa solution exacte
+%% Dï¿½finition du problï¿½me avec sa solution exacte
 tspan		=	[0,5];
 h			=	(tspan(2)-tspan(1))./(nb_pas);
 x0			=	[1,0];
@@ -22,23 +22,23 @@ f			=	@my_edo;
 sol_exacte	=	@(t) [cos(t*sqrt(10)),-sqrt(10)*sin(t*sqrt(10))];
 
 
-%% Initialisation des données
-erreur_euler_exp	=	nan(nb_eval,length(x0));
-erreur_milieu		=	nan(nb_eval,length(x0));
-erreur_euler_mod	=	nan(nb_eval,length(x0));
-erreur_rk4			=	nan(nb_eval,length(x0));
+%% Initialisation des donnï¿½es
+erreur_euler_exp	=	nan(nb_eval);
+erreur_milieu		=	nan(nb_eval);
+erreur_euler_mod	=	nan(nb_eval);
+erreur_rk4			=	nan(nb_eval);
 
 
-%% Appel des diverses méthodes et calcul des erreurs absolues
+%% Appel des diverses mï¿½thodes et calcul des erreurs absolues
 for t=1:nb_eval
-	[temps , y_euler_exp]	=	crank_nic(f , tspan , x0 , nb_pas(t));
-	erreur_euler_exp(t,:)	=	max(y_euler_exp - sol_exacte(temps));
+	[temps , y_euler_exp]		=	crank_nic(f , tspan , x0 , nb_pas(t));
+	erreur_euler_exp(t)			=	norm(y_euler_exp - sol_exacte(temps),inf);
 % 	[temps , y_milieu]		=	pt_milieu(f , tspan , x0 , nb_pas(t));
-% 	erreur_milieu(t,:)		=	max(y_milieu - sol_exacte(temps));
+% 	erreur_milieu(t)			=	norm(y_milieu - sol_exacte(temps),inf);
 % 	[temps , y_euler_mod]	=	euler_mod(f , tspan , x0 , nb_pas(t));
-% 	erreur_euler_mod(t,:)	=	max(y_euler_mod - sol_exacte(temps));
-% 	[temps , y_rk4]			=	rk4(f , tspan , x0 , nb_pas(t));
-% 	erreur_rk4(t,:)			=	max(y_rk4 - sol_exacte(temps));
+% 	erreur_euler_mod(t)		=	norm(y_euler_mod - sol_exacte(temps),inf);
+% 	[temps , y_rk4]				=	rk4(f , tspan , x0 , nb_pas(t));
+% 	erreur_rk4(t)					=	norm(y_rk4 - sol_exacte(temps),inf);
 end
 
 
@@ -58,4 +58,3 @@ loglog(h,erreur_euler_exp)
 % loglog(h,erreur_rk4)
 % xlabel('h')
 % ylabel('Erreur absolue')
-
