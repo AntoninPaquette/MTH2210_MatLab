@@ -1,4 +1,4 @@
-function [approx , err_abs] = bissec(f , x0 , x1 , nb_it_max , tol_rel)
+function [approx , err_abs] = bissec(f , x0 , x1 , nb_it_max , tol_rel , file_name)
 % BISSEC	Méthode de la bissection pour la résolution f(x) = 0
 %			pour f: R -> R
 %
@@ -25,8 +25,10 @@ function [approx , err_abs] = bissec(f , x0 , x1 , nb_it_max , tol_rel)
 %%  Vérification de la fonction contenant les dérivées
 if isa(f,'char')
 	fct		=	str2func(f);
+	is_fct_file = true;
 elseif isa(f,'function_handle')
 	fct		=	f;
+	is_fct_file = false;
 else
 	error('L''argument f n''est pas un string ni un function_handle')
 end
@@ -67,6 +69,11 @@ elseif fct(x1)==0
 	approx	=	x1;
 	err_abs	=	0;
 	return
+end
+
+% Vérification du fichier output
+if nargin == 6 && ~isa(file_name,'char')
+	error('Le nom du fichier des résultats doit être de type string')
 end
 
 %% Initialisation des matrices app et err
@@ -124,6 +131,41 @@ if arret
 else
 	warning('La méthode de la bissection n''a pas convergée')
 end
+
+% Écriture des résultats si fichier passé en argument
+if nargin == 6
+	output_results(file_name , fct , is_fct_file , nb_it_max , ...
+					tol_rel , x0 , x1 , approx , err_abs , arret)
+end
+
+end
+
+
+function [] = output_results(file_name , fct , is_fct_file , it_max , ...
+							tol_rel , x0 , x1 , x , err , status)
+						 
+	fid		=	fopen(file_name,'w');
+	fprintf(fid,'Algorithme de la bissection\n\n');
+	fprintf(fid,'Fonction dont on cherche les racines:\n');
+	if is_fct_file
+		fprintf(fid,'%s\n\n',fileread([func2str(fct),'.m']));
+	else
+		fprintf(fid,'%s\n\n',func2str(fct));
+	end
+	fprintf(fid,'Arguments d''entrée:\n');
+	fprintf(fid,'    - Nombre maximum d''itérations: %d\n',it_max);
+	fprintf(fid,'    - Tolérance relative: %d\n',tol_rel);
+	fprintf(fid,'    - Approximation initial x0: %d\n',x0);
+	fprintf(fid,'    - Approximation initial x1: %d\n\n',x1);
+	
+	if status
+		fprintf(fid,'Statut: L''algorithme de la bissection a convergé\n\n');
+	else
+		fprintf(fid,'Statut: L''algorithme de la bissection n''a pas convergé\n\n');
+	end
+	fprintf(fid,'  #It            xm               erreur\n');
+	fprintf(fid,'%5d   %16.15e   %6.5e\n',[reshape(1:length(x),1,[]);reshape(x,1,[]);reshape(err,1,[])]);
+	fclose(fid);
 
 
 end
