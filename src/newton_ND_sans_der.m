@@ -1,4 +1,4 @@
-function [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel)
+function [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel , file_name)
 % NEWTON_ND_SANS_DER	Méthode de Newton pour la résolution de F(x) = 0, pour F: R^n -> R^n
 %
 % Syntaxe: [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel)
@@ -17,14 +17,18 @@ function [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel)
 %					erreurs absolues
 %
 % Exemples d'appel
-%	[ approx , err_abs ] = newton_ND_sans_der( 'my_sys_nl' , [1,1] , 20 , 1e-9 )
+%	[ approx , err_abs ] = newton_ND_sans_der( 'my_sys_nl' , [1,1] , 20 , 1e-9 , 'resul_newtonND.txt')
+%	[ approx , err_abs ] = newton_ND_sans_der( @(x) [x(1)^2 + x(2)^2 - 1 ; -x(1)^2 + x(2)] , [1,1] , 20 , 1e-9 , 'resul_newtonND.txt')
+
 
 
 %%  Vérification de la fonction contenant les dérivées
 if isa(F,'char')
 	fct		=	str2func(F);
+	is_fct_file =	true;
 elseif isa(F,'function_handle')
 	fct		=	F;
+	is_fct_file =	false;
 else
 	error('L''argument f n''est pas un string ni un function_handle')
 end
@@ -96,6 +100,10 @@ else
 	warning('La méthode de Newton n''a pas convergée')
 end
 
+if nargin == 5
+	output_results(file_name , fct , is_fct_file , ...
+				nb_it_max , tol_rel , x0 , approx , err_abs , arret)
+end
 
 end
 
@@ -121,4 +129,52 @@ function [app_finale] = app_jacobienne(f,x0)
 	end
 	
 	app_finale	=	(2^2*app{2} - app{1})/(2^2-1);
+end
+
+function [] = output_results(file_name , fct , is_fct_file , ...
+			      it_max , tol_rel , x0 , x , err , status)
+						 
+	fid		=	fopen(file_name,'w');
+	fprintf(fid,'Algorithme de Newton approximant la matrice jacobienne\n\n');
+	fprintf(fid,'Fonction dont on cherche les racines:\n');
+	if is_fct_file
+		fprintf(fid,'%s\n\n',fileread([func2str(fct),'.m']));
+	else
+		fprintf(fid,'%s\n\n',func2str(fct));
+	end
+
+	fprintf(fid,'Arguments d''entrée:\n');
+	fprintf(fid,'    - Nombre maximum d''itérations: %d\n',it_max);
+	fprintf(fid,'    - Tolérance relative: %6.5e\n',tol_rel);
+	fprintf(fid,'    - Approximation initiale x0: [');
+	taille	=	size(x,2);
+	if taille <= 3
+		fprintf(fid,'%6.5e ',x0(1:taille));
+		fprintf(fid,']\n');
+	else
+		fprintf(fid,'%6.5e ',x0(1:2));
+		fprintf(fid,'... %6.5e]',x0(end));
+	end
+	
+	if status
+		fprintf(fid,'\nStatut: L''algorithme de Newton a convergé en %d itérations\n\n',size(x,1)-1);
+	else
+		fprintf(fid,'\nStatut: L''algorithme de Newton n''a pas convergé\n\n');
+	end
+	if taille == 1
+		fprintf(fid,'#It       x_1           Erreur absolue\n');
+		fprintf(fid,'%3d   %16.15e   %6.5e\n',[reshape(0:length(x)-1,1,[]);reshape(x(:),1,[]);reshape(err,1,[])]);
+	elseif taille == 2
+		fprintf(fid,'#It       x_1           x_2       Erreur absolue\n');
+		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2])';reshape(err,1,[])]);
+	elseif taille == 3
+		fprintf(fid,'#It       x_1           x_2           x_3       Erreur absolue\n');
+		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,3])';reshape(err,1,[])]);
+	else
+		fprintf(fid,'#It       x_1           x_2      ...       x_n       Erreur absolue\n');
+		fprintf(fid,'%3d   %6.5e   %6.5e  ...  %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,taille])';reshape(err,1,[])]);
+	end
+	
+	fclose(fid);
+
 end

@@ -11,6 +11,8 @@ function [approx , err_abs] = bissec(f , x0 , x1 , nb_it_max , tol_rel , file_na
 %	x1			-	2ème approximation initiale 
 %	nb_it_max	-	Nombre maximum d'itérations 
 %	tol			-	Tolérance sur l'approximation de l'erreur relative
+%	file_name	-	(Optionnel) Nom du fichier (avec l'extension .txt) dans
+%					lequel sera	écrit les résultats de l'algorithme
 %
 % Arguments de sortie
 %	approx		-	Vecteur colonne de taille nb_iter contenant les 
@@ -19,7 +21,9 @@ function [approx , err_abs] = bissec(f , x0 , x1 , nb_it_max , tol_rel , file_na
 %					erreurs absolues
 %
 % Exemples d'appel
-%	[ approx , err_abs ] = bissec( @(x) x.^2-10 , 3 , 4 , 100 , 1e-9 )
+%	[ approx , err_abs ] = bissec( 'my_fct_nl' , 3 , 4 , 100 , 1e-9 , 'resul_bissec.txt')
+%	[ approx , err_abs ] = bissec( @(x) x.^2-10 , 3 , 4 , 100 , 1e-9 , 'resul_bissec.txt')
+
 
 
 %%  Vérification de la fonction contenant les dérivées
@@ -154,18 +158,17 @@ function [] = output_results(file_name , fct , is_fct_file , it_max , ...
 	end
 	fprintf(fid,'Arguments d''entrée:\n');
 	fprintf(fid,'    - Nombre maximum d''itérations: %d\n',it_max);
-	fprintf(fid,'    - Tolérance relative: %d\n',tol_rel);
-	fprintf(fid,'    - Approximation initial x0: %d\n',x0);
-	fprintf(fid,'    - Approximation initial x1: %d\n\n',x1);
+	fprintf(fid,'    - Tolérance relative: %6.5e\n',tol_rel);
+	fprintf(fid,'    - Approximation initiale x0: %16.15e\n',x0);
+	fprintf(fid,'    - Approximation initiale x1: %16.15e\n\n',x1);
 	
 	if status
-		fprintf(fid,'Statut: L''algorithme de la bissection a convergé\n\n');
+		fprintf(fid,'\nStatut: L''algorithme de la bissection a convergé en %d itérations\n\n',length(x));
 	else
-		fprintf(fid,'Statut: L''algorithme de la bissection n''a pas convergé\n\n');
+		fprintf(fid,'\nStatut: L''algorithme de la bissection n''a pas convergé\n\n');
 	end
-	fprintf(fid,'  #It            xm               erreur\n');
-	fprintf(fid,'%5d   %16.15e   %6.5e\n',[reshape(1:length(x),1,[]);reshape(x,1,[]);reshape(err,1,[])]);
+	fprintf(fid,'#It            x              Erreur absolue\n');
+	fprintf(fid,'%3d   %16.15e   %6.5e\n',[reshape(1:length(x),1,[]);reshape(x,1,[]);reshape(err,1,[])]);
 	fclose(fid);
-
 
 end
