@@ -1,10 +1,10 @@
 function [temps , y] = crank_nic(f , tspan , x0 , nb_pas)
-% CRANK_NIC	Méthode d'Euler explicite avec pas constant pour la
+% CRANK_NIC	Méthode de Crank-Nicolson avec pas constant pour la
 %			résolution d'EDOs
 %
 % Syntaxe: [temps , y] = crank_nic(f , tspan , Y0 , nb_pas)
 %
-% Argument d'entrée
+% Arguments d'entrée
 %	f		-	String ou function handle définissant le système de N EDOs
 %	tspan	-	Vecteur contenant le temps initial et final [t0,tf]
 %	x0		-	Vecteur contenant les N conditions initiales
@@ -13,7 +13,7 @@ function [temps , y] = crank_nic(f , tspan , x0 , nb_pas)
 % Arguments de sortie
 %	temps	-	Vecteur colonne contenant les valeurs de temps t_i
 %	y		-	Matrice de dimension (nb_pas+1) x N dont les colonnes 
-%				sont les approximation de y_i(t)
+%				sont les approximations de y_i(t)
 %
 % Exemples d'appel
 %	[temps , y] = crank_nic(@(t,y) y*cos(t) , [0,2] , 1 , 1000 );
@@ -29,7 +29,7 @@ else
 	error('L''argument f n''est pas un string ni un function_handle')
 end
 
-%% Vérification de la valeur de h
+%% Vérification du temps et nb pas de temps
 if ~isnumeric(tspan) || length(tspan)~=2
 	error('Le vecteur tspan doit contenir 2 composantes, [t0 , tf]')
 elseif ~isnumeric(nb_pas) || floor(nb_pas)~=nb_pas ...
@@ -74,7 +74,7 @@ y(1,:)		=	reshape(x0,1,nb_comp);
 
 %% Méthode d'Euler implicite avec pas constant
 for t=1:nb_pas
-	fct_nl	=	@(x) x - y(t,:) - h/2*(fct(temps(t),y(t,:)) + fct(temps(t+1),x)); 
+	fct_nl	=	@(x) reshape(x,1,nb_comp) - y(t,:) - h/2*reshape(fct(temps(t),y(t,:)) + fct(temps(t+1),x),1,nb_comp); 
 	[approx , err_abs] = newton_ND_sans_der(fct_nl , y(t,:) , 10 , 1e-9);
 	if isinf(err_abs(end))
 		warning('Problème au temps %1.6e',temps(t+1))

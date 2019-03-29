@@ -4,7 +4,7 @@ function [temps , y] = pt_milieu(f , tspan , Y0 , nb_pas)
 %
 % Syntaxe: [temps , y] = pt_milieu(f , tspan , Y0 , nb_pas)
 %
-% Argument d'entrée
+% Arguments d'entrée
 %	f		-	String ou function handle définissant le système de N EDOs
 %	tspan	-	Vecteur contenant le temps initial et final [t0,tf]
 %	x0		-	Vecteur contenant les N conditions initiales
@@ -13,7 +13,7 @@ function [temps , y] = pt_milieu(f , tspan , Y0 , nb_pas)
 % Arguments de sortie
 %	temps	-	Vecteur colonne contenant les valeurs de temps t_i
 %	y		-	Matrice de dimension (nb_pas+1) x N dont les colonnes 
-%				sont les approximation de y_i(t)
+%				sont les approximations de y_i(t)
 %
 % Exemples d'appel
 %	[temps , y] = pt_milieu(@(t,y) y*cos(t) , [0,2] , 1 , 1000 );
@@ -31,7 +31,7 @@ else
 	error('L''argument f n''est pas un string ni un function_handle')
 end
 
-%% Vérification de la valeur de h
+%% Vérification du temps et nb pas de temps
 if ~isnumeric(tspan) || length(tspan)~=2
 	error('Le vecteur tspan doit contenir 2 composantes, [t0 , tf]')
 elseif ~isnumeric(nb_pas) || floor(nb_pas)~=nb_pas ...

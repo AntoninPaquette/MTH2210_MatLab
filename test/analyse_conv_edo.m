@@ -9,7 +9,7 @@ close all
 
 tic()
 %% Définition des paramètres pour l'analyse de convergence
-nb_eval			=	10;
+nb_eval			=	12;
 nb_pas_init		=	100;
 nb_pas			=	2.^(0:nb_eval-1) * nb_pas_init;
 
@@ -27,8 +27,8 @@ erreur_euler_exp	=	nan(nb_eval,1);
 erreur_milieu		=	nan(nb_eval,1);
 erreur_euler_mod	=	nan(nb_eval,1);
 erreur_rk4			=	nan(nb_eval,1);
-erreur_euler_imp	=	nan(nb_eval,1);
-erreur_crank_nic	=	nan(nb_eval,1);
+% erreur_euler_imp	=	nan(nb_eval,1);
+% erreur_crank_nic	=	nan(nb_eval,1);
 
 
 
@@ -43,9 +43,9 @@ for t=1:nb_eval
 	[temps , y_rk4]			=	rk4(f , tspan , x0 , nb_pas(t));
 	erreur_rk4(t,:)			=	norm(y_rk4 - sol_exacte(temps),inf);
 	[temps , y_euler_imp]	=	euler_imp(f , tspan , x0 , nb_pas(t));
-	erreur_euler_imp(t,:)			=	norm(y_euler_imp - sol_exacte(temps),inf);
+	erreur_euler_imp(t,:)	=	norm(y_euler_imp - sol_exacte(temps),inf);
 	[temps , y_crank_nic]	=	crank_nic(f , tspan , x0 , nb_pas(t));
-	erreur_crank_nic(t,:)			=	norm(y_crank_nic - sol_exacte(temps),inf);
+	erreur_crank_nic(t,:)	=	norm(y_crank_nic - sol_exacte(temps),inf);
 end
 
 

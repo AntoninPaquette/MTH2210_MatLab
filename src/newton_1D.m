@@ -2,14 +2,14 @@ function [approx , err_abs] = newton_1D(f , df , x0 , nb_it_max , tol_rel , file
 % NEWTON_1D	Méthode de Newton pour la résolution f(x) = 0,
 %			pour f: R -> R
 %
-% Syntaxe: [approx , err_abs] = newton_1D(f , df , x0 , nb_it_max ,tol_rel)
+% Syntaxe: [approx , err_abs] = newton_1D(f , df , x0 , nb_it_max , tol_rel , file_name)
 %
-% Argument d'entrée
+% Arguments d'entrée
 %	f			-	String ou fonction handle spécifiant la fonction
 %					non-linéaire
 %	df			-	String ou function handle spécifiant la dérivée de f
 %	x0			-	Approximation initiale
-%	nb_it_max	-	Nombre maximum d'itï¿½rations
+%	nb_it_max	-	Nombre maximum d'itérations
 %	tol_rel		-	Tolérance sur l'approximation de l'erreur relative
 %	file_name	-	(Optionnel) Nom du fichier (avec l'extension .txt) dans
 %					lequel sera	écrit les résultats de l'algorithme
@@ -22,11 +22,11 @@ function [approx , err_abs] = newton_1D(f , df , x0 , nb_it_max , tol_rel , file
 %
 % Exemples d'appel
 %	[ approx , err_abs ] = newton_1D( 'my_fct_nl' , 'my_dfct_nl' , 3 , 20 , 1e-9 , 'resul_newton.txt')
-%	[ approx , err_abs ] = newton_1D( @(x) x.^2-10 , @(x) 2*x , 3 , 20 , 1e-9 , , 'resul_newton.txt')
+%	[ approx , err_abs ] = newton_1D( @(x) x.^2-10 , @(x) 2*x , 3 , 20 , 1e-9 ,  'resul_newton.txt')
 
 
 
-%%  Vérification de la fonction contenant les dérivées
+%%  Vérification de la fonction f et de la donction df
 if isa(f,'char')
 	fct			=	str2func(f);
 	is_fct_file =	true;
@@ -47,7 +47,7 @@ else
 	error('L''argument df n''est pas un string ni un function_handle')
 end
 
-%% Vérification du nb de composantes des conditions initiales et de f
+%% Vérification du nb de composantes d l'approximation initiale et de f
 if ~isnumeric(x0) || ~isscalar(x0)
 	error('L''approximation initiale x0 n''est pas un scalaire')
 end
@@ -86,6 +86,11 @@ elseif ~isnumeric(d_fct(x0)) || ~isscalar(d_fct(x0))
 	error('Le fonction df ne retourne pas un scalaire')
 elseif ~check_derivative(fct,d_fct,x0)
 	warning('Il semble y avoir une erreur avec la dérivées')
+end
+
+%% Vérification du fichier output
+if nargin == 6 && ~isa(file_name,'char')
+	error('Le nom du fichier des résultats doit être de type string')
 end
 
 %% Initialisation des matrices app et err

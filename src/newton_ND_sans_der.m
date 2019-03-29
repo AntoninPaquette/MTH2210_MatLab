@@ -1,17 +1,19 @@
 function [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel , file_name)
 % NEWTON_ND_SANS_DER	Méthode de Newton pour la résolution de F(x) = 0, pour F: R^n -> R^n
 %
-% Syntaxe: [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel)
+% Syntaxe: [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel , file_name)
 %
-% Argument d'entrée
+% Arguments d'entrée
 %	F			-	String ou fonction handle spécifiant la fonction
 %					non-linéaire (F: R^n -> R^n)
-%	x0			-	Approximation initiale (x0 in R^n)
+%	x0			-	Approximation initiale (x0 dans R^n)
 %	nb_it_max	-	Nombre maximum d'itérations 
-%	tol			-	Tolérance sur l'approximation de l'erreur relative
+%	tol_rel		-	Tolérance sur l'approximation de l'erreur relative
+%	file_name	-	(Optionnel) Nom du fichier (avec l'extension .txt) dans
+%					lequel sera	écrit les résultats de l'algorithme
 %
 % Arguments de sortie
-%	approx		-	Vecteur colonne de taille nb_iter contenant les 
+%	approx		-	Vecteur colonne de taille (nb_iter x n) contenant les 
 %					itérations
 %	err_abs		-	Vecteur colonne de dimension nb_iter contenant les
 %					erreurs absolues
@@ -22,7 +24,7 @@ function [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel , 
 
 
 
-%%  Vérification de la fonction contenant les dérivées
+%%  Vérification de la fonction F
 if isa(F,'char')
 	fct		=	str2func(F);
 	is_fct_file =	true;
@@ -34,7 +36,7 @@ else
 end
 
 
-%% Vérification du nb de composantes des conditions initiales et de f
+%% Vérification du nb de composantes des approximations initiales et de F
 if ~isnumeric(x0) || ~isvector(x0)
 	error('L''approximation initiale x0 n''est pas un vecteur')
 end
@@ -60,6 +62,10 @@ if ~isnumeric(fct(x0)) || ~isvector(fct(x0)) || (length(fct(x0))~=taille)
 		'x0 est de taille %d alors que F(x0) est de taille %d.'],taille,length(fct(x0)))
 end
 
+%% Vérification du fichier output
+if nargin == 5 && ~isa(file_name,'char')
+	error('Le nom du fichier des résultats doit être de type string')
+end
 
 %% Initialisation des matrices app et err
 app			=	nan(nb_it_max,taille);
@@ -75,6 +81,12 @@ for t=1:nb_it_max-1
 	delta_x		=	app_jac\-reshape(fct(app(t,:)),taille,1);
 	app(t+1,:)	=	app(t,:) + delta_x';
 	
+	if any(~isfinite(app_jac(:)))
+		warning(['La matrice jacobienne de f à l''itération %d est singulière 0.\n',...
+					'Arrêt de l''algorithme'],t)
+		break
+	end
+	
 	if min(abs(eig(app_jac))) == 0  
 		warning(['La matrice jacobienne de f à l''itération %d est singulière 0.\n',...
 					'Arrêt de l''algorithme'],t)
@@ -86,6 +98,7 @@ for t=1:nb_it_max-1
 		arret	=	true;
 		break
 	end
+	
 end
 
 nb_it	=	t+1;
@@ -100,6 +113,7 @@ else
 	warning('La méthode de Newton n''a pas convergée')
 end
 
+% Écriture des résultats si fichier passé en argument
 if nargin == 5
 	output_results(file_name , fct , is_fct_file , ...
 				nb_it_max , tol_rel , x0 , approx , err_abs , arret)
@@ -169,10 +183,10 @@ function [] = output_results(file_name , fct , is_fct_file , ...
 		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2])';reshape(err,1,[])]);
 	elseif taille == 3
 		fprintf(fid,'#It       x_1           x_2           x_3       Erreur absolue\n');
-		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,3])';reshape(err,1,[])]);
+		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,3])';reshape(err,1,[])]);
 	else
 		fprintf(fid,'#It       x_1           x_2      ...       x_n       Erreur absolue\n');
-		fprintf(fid,'%3d   %6.5e   %6.5e  ...  %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,taille])';reshape(err,1,[])]);
+		fprintf(fid,'%3d   %6.5e   %6.5e  ...  %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,taille])';reshape(err,1,[])]);
 	end
 	
 	fclose(fid);

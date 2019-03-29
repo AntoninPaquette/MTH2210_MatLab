@@ -1,21 +1,21 @@
 function [approx , err_abs] = newton_ND_avec_der(F , mat_jac , x0 , nb_it_max , tol_rel , file_name)
 % NEWTON_ND_AVEC_DER	Méthode de Newton pour la résolution de F(x) = 0, pour F: R^n -> R^n
 %
-% Syntaxe: [approx , err_abs] = newton_ND_avec_der(f , Jac , x0 , nb_it_max , tol_rel)
+% Syntaxe: [approx , err_abs] = newton_ND_avec_der(F , mat_jac , x0 , nb_it_max , tol_rel , file_name)
 %
-% Argument d'entrée
+% Arguments d'entrée
 %	F			-	String ou fonction handle spécifiant la fonction
 %					non-linéaire (F: R^n -> R^n)
 %	mat_jac		-	String ou function handle spécifiant la matrice
 %					jacobienne de F (Jac: R^n -> R^{n x n})
-%	x0			-	Approximation initiale (x0 in R^n)
+%	x0			-	Approximation initiale (x0 dans R^n)
 %	nb_it_max	-	Nombre maximum d'itérations 
-%	tol			-	Tolérance sur l'approximation de l'erreur relative
+%	tol_rel		-	Tolérance sur l'approximation de l'erreur relative
 %	file_name	-	(Optionnel) Nom du fichier (avec l'extension .txt) dans
 %					lequel sera	écrit les résultats de l'algorithme
 %
 % Arguments de sortie
-%	approx		-	Vecteur colonne de taille nb_iter contenant les 
+%	approx		-	Vecteur colonne de taille (nb_iter x n) contenant les 
 %					itérations
 %	err_abs		-	Vecteur colonne de dimension nb_iter contenant les
 %					erreurs absolues
@@ -26,7 +26,7 @@ function [approx , err_abs] = newton_ND_avec_der(F , mat_jac , x0 , nb_it_max , 
 
 
 
-%%  Vérification de la fonction contenant les dérivées
+%%  Vérification de la fonction F et de la matrice jacobienne
 if isa(F,'char')
 	fct			=	str2func(F);
 	is_fct_file =	true;
@@ -47,7 +47,7 @@ else
 	error('L''argument df n''est pas un string ni un function_handle')
 end
 
-%% Vérification du nb de composantes des conditions initiales et de f
+%% Vérification du nb de composantes des approximations initiales et de f
 if ~isnumeric(x0) || ~isvector(x0)
 	error('L''approximation initiale x0 n''est pas un vecteur')
 end
@@ -93,6 +93,11 @@ elseif ~check_derivative(fct,jac,x0)
 	warning('Il semble y avoir une erreur avec la matrice jacobienne')
 end
 
+%% Vérification du fichier output
+if nargin == 6 && ~isa(file_name,'char')
+	error('Le nom du fichier des résultats doit être de type string')
+end
+
 %% Initialisation des matrices app et err
 app			=	nan(nb_it_max,taille);
 app(1,:)	=	x0;
@@ -103,10 +108,17 @@ arret		=	false;
 %% Méthode de Newton
 for t=1:nb_it_max-1
 	
-	delta_x		=	jac(app(t,:))\-reshape(fct(app(t,:)),taille,1);
+	jacobienne	=	jac(app(t,:));
+	delta_x		=	jacobienne\-reshape(fct(app(t,:)),taille,1);
 	app(t+1,:)	=	app(t,:) + delta_x';
 	
-	if min(abs(eig(jac(app(t,:))))) == 0  
+	if any(~isfinite(jacobienne(:)))
+		warning(['La matrice jacobienne de f à l''itération %d est singulière 0.\n',...
+					'Arrêt de l''algorithme'],t)
+		break
+	end
+	
+	if min(abs(eig(jacobienne))) == 0  
 		warning(['La matrice jacobienne de f à l''itération %d est singulière 0.\n',...
 					'Arrêt de l''algorithme'],t)
 		break
@@ -132,6 +144,7 @@ else
 	warning('La méthode de Newton n''a pas convergée')
 end
 
+% Écriture des résultats si fichier passé en argument
 if nargin == 6
 	output_results(file_name , fct , is_fct_file , jac, is_jac_file, ...
 				nb_it_max , tol_rel , x0 , approx , err_abs , arret)
@@ -212,10 +225,10 @@ function [] = output_results(file_name , fct , is_fct_file , jac, ...
 		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2])';reshape(err,1,[])]);
 	elseif taille == 3
 		fprintf(fid,'#It       x_1           x_2           x_3       Erreur absolue\n');
-		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,3])';reshape(err,1,[])]);
+		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,3])';reshape(err,1,[])]);
 	else
 		fprintf(fid,'#It       x_1           x_2      ...       x_n       Erreur absolue\n');
-		fprintf(fid,'%3d   %6.5e   %6.5e  ...  %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,taille])';reshape(err,1,[])]);
+		fprintf(fid,'%3d   %6.5e   %6.5e  ...  %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,taille])';reshape(err,1,[])]);
 	end
 	
 	fclose(fid);

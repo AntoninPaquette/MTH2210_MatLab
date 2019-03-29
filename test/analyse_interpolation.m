@@ -19,7 +19,7 @@ xfin	=	linspace(min(xi),max(xi),1000);
 y_inter		=	lagrange(xi,yi,xfin);
 y_exacte	=	fct1(xfin);
 
-err_rel1	=	normeL2(y_exacte - y_inter)/normeL2(y_exacte)
+err_rel1	=	norm(y_exacte - y_inter)/norm(y_exacte);
 
 %% Vérification de la fonction lagrange pour polynôme 2
 
@@ -32,7 +32,7 @@ xfin	=	linspace(min(xi),max(xi),1000);
 y_inter		=	lagrange(xi,yi,xfin);
 y_exacte	=	fct2(xfin);
 
-err_rel2	=	normeL2(y_exacte - y_inter)/normeL2(y_exacte)
+err_rel2	=	norm(y_exacte - y_inter)/norm(y_exacte);
 
 
 %% Vérification avec un fonction quelconque
@@ -44,6 +44,7 @@ nb_pts	=	degre + 1;
 nb_loop		=	10;
 
 x_interet	=	1/2^nb_loop;
+erreur		=	nan(nb_loop,1);
 
 for t=1:nb_loop
 	xi	=	linspace(-1/2^(t-1),1/2^(t-1),nb_pts);
@@ -73,5 +74,6 @@ y_exacte	=	fct4(x);
 
 [ Sx ] = splinec( xi , yi , x , [4,4] , [d_fct4(a),d_fct4(b)]);
 
-err_rel4	=	normeL2(y_exacte - Sx)/normeL2(y_exacte)
+err_rel4	=	norm(y_exacte - Sx)/norm(y_exacte);
+
 

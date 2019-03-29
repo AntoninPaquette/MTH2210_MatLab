@@ -12,20 +12,20 @@ alpha	=	(1+sqrt(5))/2;
 
 %% Vérification des ordre de convergence pour bissect, secante, newton1D
 % Premier problème
-fct1	=	@(x) x^2 - 2;
+fct1	=	@(x) x^2 - 10;
 d_fct1	=	@(x) 2*x;
 
-x0	=	0.5;
-x1	=	3;
+x0	=	2;
+x1	=	5;
 
 
 [approx_bis1 , err_bis1] = bissec(fct1 , x0 , x1 , 200 , 1e-12);
 [approx_sec1 , err_sec1] = secante(fct1 , x0 , x1 , 200 , 1e-12);
 [approx_new1 , err_new1] = newton_1D(fct1 , d_fct1, x1 , 200 , 1e-12);
 
-err_ex_bis1		=	abs(approx_bis1-sqrt(2));
-err_ex_sec1		=	abs(approx_sec1-sqrt(2));
-err_ex_new1		=	abs(approx_new1-sqrt(2));
+err_ex_bis1		=	abs(approx_bis1-sqrt(10));
+err_ex_sec1		=	abs(approx_sec1-sqrt(10));
+err_ex_new1		=	abs(approx_new1-sqrt(10));
 
 
 % Calcul des ratios
@@ -43,15 +43,15 @@ semilogy(1:length(err_ex_bis1),err_ex_bis1)
 hold on
 semilogy(1:length(err_ex_sec1),err_ex_sec1)
 semilogy(1:length(err_ex_new1),err_ex_new1)
-
+legend('Bissection','Secante','Newton')
 %% Vérification des ordre de convergence pour bissect, secante, newton1D
 % Deuxième problème
 
 fct2	=	@(x) exp(x) - x^3;
 d_fct2	=	@(x) exp(x) - 3*x^2;
 
-x0	=	0.5;
-x1	=	3;
+x0	=	1.5;
+x1	=	2.25;
 
 
 [approx_bis2 , err_bis2] = bissec(fct2 , x0 , x1 , 200 , 1e-12);
@@ -73,6 +73,7 @@ semilogy(1:length(err_bis2),err_bis2)
 hold on
 semilogy(1:length(err_sec2),err_sec2)
 semilogy(1:length(err_new2),err_new2)
+legend('Bissection','Secante','Newton')
 
 
 % Vérification de Newton pour racines multiples

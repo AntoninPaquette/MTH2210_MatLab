@@ -2,15 +2,15 @@ function [approx , err_abs] = bissec(f , x0 , x1 , nb_it_max , tol_rel , file_na
 % BISSEC	Méthode de la bissection pour la résolution f(x) = 0
 %			pour f: R -> R
 %
-% Syntaxe: [approx , err_abs] = bissec(f , x0 , x1 , nb_it_max , tol_rel)
+% Syntaxe: [approx , err_abs] = bissec(f , x0 , x1 , nb_it_max , tol_rel , file_name)
 %
-% Argument d'entrée
+% Arguments d'entrée
 %	f			-	String ou fonction handle spécifiant la fonction
 %					non-linéaire
 %	x0			-	1ère approximation initiale 
 %	x1			-	2ème approximation initiale 
 %	nb_it_max	-	Nombre maximum d'itérations 
-%	tol			-	Tolérance sur l'approximation de l'erreur relative
+%	tol_rel		-	Tolérance sur l'approximation de l'erreur relative
 %	file_name	-	(Optionnel) Nom du fichier (avec l'extension .txt) dans
 %					lequel sera	écrit les résultats de l'algorithme
 %
@@ -26,7 +26,7 @@ function [approx , err_abs] = bissec(f , x0 , x1 , nb_it_max , tol_rel , file_na
 
 
 
-%%  Vérification de la fonction contenant les dérivées
+%%  Vérification de la fonction
 if isa(f,'char')
 	fct		=	str2func(f);
 	is_fct_file = true;
@@ -37,7 +37,7 @@ else
 	error('L''argument f n''est pas un string ni un function_handle')
 end
 
-%% Vérification du nb de composantes des conditions initiales et de f
+%% Vérification du nb de composantes de l'approximation initiale et de f
 if ~isnumeric(x0) || ~isscalar(x0)
 	error('L''approximation initiale x0 n''est pas un scalaire')
 elseif ~isnumeric(x1) || ~isscalar(x1)
@@ -75,7 +75,7 @@ elseif fct(x1)==0
 	return
 end
 
-% Vérification du fichier output
+%% Vérification du fichier output
 if nargin == 6 && ~isa(file_name,'char')
 	error('Le nom du fichier des résultats doit être de type string')
 end

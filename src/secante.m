@@ -4,13 +4,15 @@ function [approx , err_abs] = secante(f , x0 , x1 , nb_it_max , tol_rel , file_n
 %
 % Syntaxe: [approx , err_abs] = secante(f , x0 , x1 , nb_it_max , tol_rel)
 %
-% Argument d'entrée
+% Arguments d'entrée
 %	f			-	String ou fonction handle spécifiant la fonction
 %					non-linéaire
 %	x0			-	1ère approximation initiale
 %	x1			-	2ème approximation initiale
 %	nb_it_max	-	Nombre maximum d'itérations
-%	tol			-	Tolérance sur l'approximation de l'erreur relative
+%	tol_rel		-	Tolérance sur l'approximation de l'erreur relative
+%	file_name	-	(Optionnel) Nom du fichier (avec l'extension .txt) dans
+%					lequel sera	écrit les résultats de l'algorithme
 %
 % Arguments de sortie
 %	approx		-	Vecteur colonne de taille nb_iter contenant les
@@ -23,7 +25,7 @@ function [approx , err_abs] = secante(f , x0 , x1 , nb_it_max , tol_rel , file_n
 %	[ approx , err_abs ] = secante( @(x) x.^2-10 , 3 , 4 , 100 , 1e-9 , 'resul_secante.txt')
 
 
-%%  Vérification de la fonction contenant les dérivées
+%%  Vérification de la fonction f
 if isa(f,'char')
 	fct		=	str2func(f);
 	is_fct_file = true;
@@ -34,7 +36,7 @@ else
 	error('L''argument f n''est pas un string ni un function_handle')
 end
 
-%% Vérification du nb de composantes des conditions initiales et de f
+%% Vérification du nb de composantes de l'approximation initiale et de f
 if ~isnumeric(x0) || ~isscalar(x0)
 	error('L''approximation initiale x0 n''est pas un scalaire')
 elseif ~isnumeric(x1) || ~isscalar(x1)
@@ -59,6 +61,10 @@ if ~isnumeric(fct(x0)) || ~isscalar(fct(x0))
 	error('Le fonction f ne retourne pas un scalaire')
 end
 
+%% Vérification du fichier output
+if nargin == 6 && ~isa(file_name,'char')
+	error('Le nom du fichier des résultats doit être de type string')
+end
 
 %% Initialisation des matrices app et err
 app			=	nan(nb_it_max,1);
