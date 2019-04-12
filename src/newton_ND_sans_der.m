@@ -44,15 +44,7 @@ end
 try 
 	fct(x0);
 catch ME
-	if strcmp(ME.identifier,'MATLAB:UndefinedFunction')
-		error('La fonction F n''est pas dans le répertoire courant')
-	elseif strcmp(ME.identifier,'MATLAB:badsubscript')
-		error('Le fonction F ne retourne pas un vecteur')
-	elseif strcmp(ME.identifier,'MATLAB:minrhs')
-		error('La fonction F doit prendre seulement 1 argument en entrée')
-	else 
-		rethrow(ME)
-	end
+	rethrow(ME)
 end
 
 taille	=	length(x0);

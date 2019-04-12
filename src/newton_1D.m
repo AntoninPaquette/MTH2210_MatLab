@@ -55,29 +55,13 @@ end
 try
 	fct(x0);
 catch ME
-	if strcmp(ME.identifier,'MATLAB:UndefinedFunction')
-		error('La fonction f n''est pas dans le répertoire courant')
-	elseif strcmp(ME.identifier,'MATLAB:badsubscript')
-		error('Le fonction f ne retourne pas un scalaire')
-	elseif strcmp(ME.identifier,'MATLAB:minrhs')
-		error('La fonction f doit prendre seulement 1 argument en entrée')
-	else
-		rethrow(ME)
-	end
+	rethrow(ME)
 end
 
 try
 	d_fct(x0);
 catch ME
-	if strcmp(ME.identifier,'MATLAB:UndefinedFunction')
-		error('La fonction df n''est pas dans le répertoire courant')
-	elseif strcmp(ME.identifier,'MATLAB:badsubscript')
-		error('Le fonction df ne retourne pas un scalaire')
-	elseif strcmp(ME.identifier,'MATLAB:minrhs')
-		error('La fonction df doit prendre seulement 1 argument en entrée')
-	else
-		rethrow(ME)
-	end
+	rethrow(ME)
 end
 
 if ~isnumeric(fct(x0)) || ~isscalar(fct(x0))

@@ -16,9 +16,9 @@ function [temps , y] = euler_imp(f , tspan , Y0 , nb_pas)
 %				sont les approximations de y_i(t)
 %
 % Exemples d'appel
+%	[temps , y] = euler_imp('my_edo' , [0,1] , [1;0] , 1000);
 %	[temps , y] = euler_imp(@(t,y) y*cos(t) , [0,2] , 1 , 1000 );
 %	[temps , y] = euler_imp(@(t,z) [z(2);-10*z(1)] , [0,1] , [1;0] , 1000);
-%	[temps , y] = euler_imp('my_edo' , [0,1] , [1;0] , 1000);
 
 %%  Vérification de la fonction contenant les dérivées
 if isa(f,'char')
@@ -50,13 +50,7 @@ end
 try 
 	fct(t0,Y0);
 catch ME
-	if strcmp(ME.identifier,'MATLAB:UndefinedFunction')
-		error('La fonction f n''est pas dans le répertoire courant')
-	elseif strcmp(ME.identifier,'MATLAB:badsubscript')
-		error('Le nombre de composantes de x0 et f ne concorde pas')
-	else 
-		rethrow(ME)
-	end
+	rethrow(ME)
 end
 
 if ~isnumeric(fct(t0,Y0)) || ~isvector(fct(t0,Y0))
