@@ -39,7 +39,7 @@ elseif ~isnumeric(yi) || ~isvector(yi)
 elseif length(xi) ~= length(yi)
 	error('Les vecteurs xi et yi doivent avoir la meme taille');
 elseif ~isnumeric(x) || ~isvector(x)
-	error('Les points où l''on évalue la spline cubique doivent être arrangées en vecteur');
+	error('Les points où l''on évalue le polynome doivent être arrangées en vecteur');
 elseif isequal(xi,x)
 	warning('Le polynôme d''interpolation est évalué exactement au points d''interpolation')
 end

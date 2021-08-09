@@ -42,10 +42,10 @@ for t=1:nb_eval
 	erreur_euler_mod(t,:)	=	norm(y_euler_mod - sol_exacte(temps),inf);
 	[temps , y_rk4]			=	rk4(f , tspan , x0 , nb_pas(t));
 	erreur_rk4(t,:)			=	norm(y_rk4 - sol_exacte(temps),inf);
-	[temps , y_euler_imp]	=	euler_imp(f , tspan , x0 , nb_pas(t));
-	erreur_euler_imp(t,:)	=	norm(y_euler_imp - sol_exacte(temps),inf);
-	[temps , y_crank_nic]	=	crank_nic(f , tspan , x0 , nb_pas(t));
-	erreur_crank_nic(t,:)	=	norm(y_crank_nic - sol_exacte(temps),inf);
+% 	[temps , y_euler_imp]	=	euler_imp(f , tspan , x0 , nb_pas(t));
+% 	erreur_euler_imp(t,:)	=	norm(y_euler_imp - sol_exacte(temps),inf);
+% 	[temps , y_crank_nic]	=	crank_nic(f , tspan , x0 , nb_pas(t));
+% 	erreur_crank_nic(t,:)	=	norm(y_crank_nic - sol_exacte(temps),inf);
 end
 
 
@@ -54,8 +54,8 @@ ordre_euler_exp	=	log(erreur_euler_exp(1:end-1)./erreur_euler_exp(2:end))/log(2)
 ordre_milieu	=	log(erreur_milieu(1:end-1)./erreur_milieu(2:end))/log(2);
 ordre_euler_mod	=	log(erreur_euler_mod(1:end-1)./erreur_euler_mod(2:end))/log(2);
 ordre_rk4		=	log(erreur_rk4(1:end-1)./erreur_rk4(2:end))/log(2);
-ordre_euler_imp	=	log(erreur_euler_imp(1:end-1)./erreur_euler_imp(2:end))/log(2);
-ordre_crank_nic	=	log(erreur_crank_nic(1:end-1)./erreur_crank_nic(2:end))/log(2);
+% ordre_euler_imp	=	log(erreur_euler_imp(1:end-1)./erreur_euler_imp(2:end))/log(2);
+% ordre_crank_nic	=	log(erreur_crank_nic(1:end-1)./erreur_crank_nic(2:end))/log(2);
 
 %% Affichage des graphiques de convergence
 figure
@@ -64,8 +64,8 @@ hold on
 loglog(h,erreur_milieu)
 loglog(h,erreur_euler_mod)
 loglog(h,erreur_rk4)
-loglog(h,erreur_euler_imp)
-loglog(h,erreur_crank_nic)
+% loglog(h,erreur_euler_imp)
+% loglog(h,erreur_crank_nic)
 xlabel('h')
 ylabel('Erreur absolue')
 legend('Euler exp','Pt milieu','Euler mod','Rk4','Euler imp','Crank nic')
