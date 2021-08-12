@@ -13,14 +13,14 @@ function [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel , 
 %					lequel sera	écrit les résultats de l'algorithme
 %
 % Arguments de sortie
-%	approx		-	Vecteur colonne de taille (nb_iter x n) contenant les 
+%	approx		-	Matrice de taille (n x nb_iter) contenant les 
 %					itérations
-%	err_abs		-	Vecteur colonne de dimension nb_iter contenant les
+%	err_abs		-	Vecteur rangée de dimension nb_iter contenant les
 %					erreurs absolues
 %
 % Exemples d'appel
-%	[ approx , err_abs ] = newton_ND_sans_der( 'my_sys_nl' , [1,1] , 20 , 1e-9 , 'resul_newtonND.txt')
-%	[ approx , err_abs ] = newton_ND_sans_der( @(x) [x(1)^2 + x(2)^2 - 1 ; -x(1)^2 + x(2)] , [1,1] , 20 , 1e-9 , 'resul_newtonND.txt')
+%	[ approx , err_abs ] = newton_ND_sans_der( 'my_sys_nl' , [1;1] , 20 , 1e-9 , 'resul_newtonND.txt')
+%	[ approx , err_abs ] = newton_ND_sans_der( @(x) [x(1)^2 + x(2)^2 - 1 ; -x(1)^2 + x(2)] , [1;1] , 20 , 1e-9 , 'resul_newtonND.txt')
 
 
 
@@ -41,17 +41,19 @@ if ~isnumeric(x0) || ~isvector(x0)
 	error('L''approximation initiale x0 n''est pas un vecteur')
 end
 
+x0_col	=	reshape(x0,[],1);
+
 try 
-	fct(x0);
+	fct(x0_col);
 catch ME
 	rethrow(ME)
 end
 
-taille	=	length(x0);
+taille	=	length(x0_col);
 
-if ~isnumeric(fct(x0)) || ~isvector(fct(x0)) || (length(fct(x0))~=taille)
+if ~isnumeric(fct(x0_col)) || ~isvector(fct(x0_col)) || (length(fct(x0_col))~=taille)
 	error(['Le fonction F ne retourne pas un vecteur de même taille que x0. ',...
-		'x0 est de taille %d alors que F(x0) est de taille %d.'],taille,length(fct(x0)))
+		'x0 est de taille %d alors que F(x0) est de taille %d.'],taille,length(fct(x0_col)))
 end
 
 %% Vérification du fichier output
@@ -60,18 +62,18 @@ if nargin == 5 && ~isa(file_name,'char')
 end
 
 %% Initialisation des matrices app et err
-app			=	nan(nb_it_max,taille);
-app(1,:)	=	x0;
-err_rel		=	inf(nb_it_max,1);
+app			=	nan(taille,nb_it_max);
+app(:,1)	=	x0_col;
+err_rel		=	inf(1,nb_it_max);
 arret		=	false;
 
 
 %% Méthode de Newton
 for t=1:nb_it_max-1
 	
-	app_jac		=	app_jacobienne(fct,app(t,:));
-	delta_x		=	app_jac\-reshape(fct(app(t,:)),taille,1);
-	app(t+1,:)	=	app(t,:) + delta_x';
+	app_jac		=	app_jacobienne(fct,app(:,t));
+	delta_x		=	app_jac\-reshape(fct(app(:,t)),taille,1);
+	app(:,t+1)	=	app(:,t) + delta_x;
 	
 	if any(~isfinite(app_jac(:)))
 		warning(['La matrice jacobienne de f à l''itération %d est singulière 0.\n',...
@@ -85,8 +87,8 @@ for t=1:nb_it_max-1
 		break
 	end
 	
-	err_rel(t)	=	norm(app(t+1,:)-app(t,:))/(norm(abs(app(t+1,:))) + eps);
-	if (err_rel(t) <= tol_rel) || (norm(fct(app(t+1,:))) == 0)
+	err_rel(t)	=	norm(app(:,t+1)-app(:,t))/(norm(abs(app(:,t+1))) + eps);
+	if (err_rel(t) <= tol_rel) || (norm(fct(app(:,t+1))) == 0)
 		arret	=	true;
 		break
 	end
@@ -94,12 +96,12 @@ for t=1:nb_it_max-1
 end
 
 nb_it	=	t+1;
-approx	=	app(1:nb_it,:);
-err_abs	=	inf(nb_it,1);
+approx	=	app(:,1:nb_it);
+err_abs	=	inf(1,nb_it);
 
 if arret
 	for t=1:nb_it
-		err_abs(t)	=	norm(approx(end,:) - approx(t,:));
+		err_abs(t)	=	norm(approx(:,end) - approx(:,t));
 	end
 else
 	warning('La méthode de Newton n''a pas convergée')
@@ -153,7 +155,7 @@ function [] = output_results(file_name , fct , is_fct_file , ...
 	fprintf(fid,'    - Nombre maximum d''itérations: %d\n',it_max);
 	fprintf(fid,'    - Tolérance relative: %6.5e\n',tol_rel);
 	fprintf(fid,'    - Approximation initiale x0: [');
-	taille	=	size(x,2);
+	[taille, nb_iter]	=	size(x);
 	if taille <= 3
 		fprintf(fid,'%6.5e ',x0(1:taille));
 		fprintf(fid,']\n');
@@ -163,22 +165,22 @@ function [] = output_results(file_name , fct , is_fct_file , ...
 	end
 	
 	if status
-		fprintf(fid,'\nStatut: L''algorithme de Newton a convergé en %d itérations\n\n',size(x,1)-1);
+		fprintf(fid,'\nStatut: L''algorithme de Newton a convergé en %d itérations\n\n',nb_iter-1);
 	else
 		fprintf(fid,'\nStatut: L''algorithme de Newton n''a pas convergé\n\n');
 	end
 	if taille == 1
 		fprintf(fid,'#It       x_1           Erreur absolue\n');
-		fprintf(fid,'%3d   %16.15e   %6.5e\n',[reshape(0:length(x)-1,1,[]);reshape(x(:),1,[]);reshape(err,1,[])]);
+		fprintf(fid,'%3d   %16.15e   %6.5e\n',[reshape(0:nb_iter-1,1,[]);reshape(x(:),1,[]);reshape(err,1,[])]);
 	elseif taille == 2
 		fprintf(fid,'#It       x_1           x_2       Erreur absolue\n');
-		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2])';reshape(err,1,[])]);
+		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e\n',[reshape(0:nb_iter-1,1,[]);reshape(x([1,2],:),2,[]);reshape(err,1,[])]);
 	elseif taille == 3
 		fprintf(fid,'#It       x_1           x_2           x_3       Erreur absolue\n');
-		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,3])';reshape(err,1,[])]);
+		fprintf(fid,'%3d   %6.5e   %6.5e   %6.5e   %6.5e\n',[reshape(0:nb_iter-1,1,[]);reshape(x([1,2,3],:),3,[]);reshape(err,1,[])]);
 	else
 		fprintf(fid,'#It       x_1           x_2      ...       x_n       Erreur absolue\n');
-		fprintf(fid,'%3d   %6.5e   %6.5e  ...  %6.5e   %6.5e\n',[reshape(0:length(x)-1,1,[]);x(:,[1,2,taille])';reshape(err,1,[])]);
+		fprintf(fid,'%3d   %6.5e   %6.5e  ...  %6.5e   %6.5e\n',[reshape(0:nb_iter-1,1,[]);reshape(x([1,2,taille],:),3,[]);reshape(err,1,[])]);
 	end
 	
 	fclose(fid);

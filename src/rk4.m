@@ -7,12 +7,12 @@ function [temps , y] = rk4(f , tspan , Y0 , nb_pas)
 % Arguments d'entrée
 %	f		-	String ou function handle définissant le système de N EDOs
 %	tspan	-	Vecteur contenant le temps initial et final [t0,tf]
-%	x0		-	Vecteur contenant les N conditions initiales
+%	x0		-	Vecteur colonne contenant les N conditions initiales
 %	nb_pas	-	Nombre de pas de temps
 %
 % Arguments de sortie
-%	temps	-	Vecteur colonne contenant les valeurs de temps t_i
-%	y		-	Matrice de dimension (nb_pas+1) x N dont les colonnes 
+%	temps	-	Vecteur rangée contenant les valeurs de temps t_i
+%	y		-	Matrice de dimension N x (nb_pas+1) dont les rangées 
 %				sont les approximations de y_i(t)
 %
 % Exemples d'appel
@@ -22,7 +22,7 @@ function [temps , y] = rk4(f , tspan , Y0 , nb_pas)
 
 
 
-%%  Vérification de la fonction contenant les dérivées
+%%  Vérification de la fonction contenant la définition des dérivées
 if isa(f,'char')
 	fct		=	str2func(f);
 elseif isa(f,'function_handle')
@@ -34,7 +34,7 @@ end
 %% Vérification du temps et nb pas de temps
 if ~isnumeric(tspan) || length(tspan)~=2
 	error('Le vecteur tspan doit contenir 2 composantes, [t0 , tf]')
-elseif ~isnumeric(nb_pas) || floor(nb_pas)~=nb_pas ...
+elseif ~isscalar(nb_pas) || floor(nb_pas)~=nb_pas ...
 						  || length(nb_pas)~=1 || nb_pas<0
 	error('Le nombre de pas nb_pas doit être entier et positif')
 end
@@ -48,33 +48,36 @@ if ~isnumeric(Y0) || ~isvector(Y0)
 	error('Les conditions initiales x0 ne sont pas arrangées en vecteur')
 end
 
+Y0_col = reshape(Y0,[],1);
+
 try 
-	fct(t0,Y0);
+	fct(t0,Y0_col);
 catch ME
 	rethrow(ME)
 end
 
-if ~isnumeric(fct(t0,Y0)) || ~isvector(fct(t0,Y0))
+if ~isnumeric(fct(t0,Y0_col)) || ~isvector(fct(t0,Y0_col))
 	error('La f ne retourne pas un vecteur')
-elseif length(Y0) ~= length(fct(t0,Y0))
+elseif length(Y0_col) ~= length(fct(t0,Y0_col))
 	error('Le nombre de composantes de x0 et f ne concorde pas')
 end
 
-nb_comp		=	length(Y0);
+nb_comp		=	length(Y0_col);
 
 %% Initialisation du temps et de la matrice y
-temps		=	reshape(linspace(t0,tf,nb_pas+1),nb_pas+1,1);
-y			=	nan(nb_pas + 1 , length(Y0));
-y(1,:)		=	reshape(Y0,1,nb_comp);
+temps		=	reshape(linspace(t0,tf,nb_pas+1),1,nb_pas+1);
+y			=	nan(length(Y0_col), nb_pas + 1);
+y(:,1)		=	Y0_col;
 
 
 %% Méthode de Runge-Kutta d'ordre 4 avec pas constant
 for t=1:nb_pas
-	k1		=	h*reshape(fct(temps(t)		 , y(t,:))		  ,1,nb_comp);
-	k2		=	h*reshape(fct(temps(t) + h/2 , y(t,:) + k1/2 ),1,nb_comp);
-	k3		=	h*reshape(fct(temps(t) + h/2 , y(t,:) + k2/2 ),1,nb_comp);
-	k4		=	h*reshape(fct(temps(t) + h   , y(t,:) + k3   ),1,nb_comp);
-	y(t+1,:)=	y(t,:) + 1/6 * ( k1 + 2*k2 + 2*k3 + k4 );
+	yt		=	y(:,t);
+	k1		=	h*reshape(fct(temps(t)		 , yt)		  ,nb_comp,1);
+	k2		=	h*reshape(fct(temps(t) + h/2 , yt + k1/2 ),nb_comp,1);
+	k3		=	h*reshape(fct(temps(t) + h/2 , yt + k2/2 ),nb_comp,1);
+	k4		=	h*reshape(fct(temps(t) + h   , yt + k3   ),nb_comp,1);
+	y(:,t+1)=	yt + 1/6 * ( k1 + 2*k2 + 2*k3 + k4 );
 end
 
 end

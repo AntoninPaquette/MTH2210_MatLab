@@ -15,9 +15,9 @@ function [approx , err_abs] = bissec(f , x0 , x1 , nb_it_max , tol_rel , file_na
 %					lequel sera	écrit les résultats de l'algorithme
 %
 % Arguments de sortie
-%	approx		-	Vecteur colonne de taille nb_iter contenant les 
+%	approx		-	Vecteur rangee de taille nb_iter contenant les 
 %					itérations
-%	err_abs		-	Vecteur colonne de dimension nb_iter contenant les
+%	err_abs		-	Vecteur rangee de dimension nb_iter contenant les
 %					erreurs absolues
 %
 % Exemples d'appel
@@ -54,8 +54,8 @@ if ~isnumeric(fct(x0)) || ~isscalar(fct(x0))
 	error('Le fonction f ne retourne pas un scalaire')
 elseif fct(x0)*fct(x1)>0
 	warning('La condition f(x0)*f(x1)<0 n''est pas respectée.\nArrêt de l''algorithme%\n',[])
-	approx	=	[x0;x1];
-	err_abs =	inf(2,1);
+	approx	=	[x0,x1];
+	err_abs =	inf(1,2);
 	return
 elseif fct(x0)==0
 	approx	=	x0;
@@ -73,8 +73,8 @@ if nargin == 6 && ~isa(file_name,'char')
 end
 
 %% Initialisation des matrices app et err
-app			=	nan(nb_it_max,1);
-err_rel		=	inf(nb_it_max,1);
+app			=	nan(1,nb_it_max);
+err_rel		=	inf(1,nb_it_max);
 arret		=	false;
 
 
@@ -120,7 +120,7 @@ end
 
 nb_it	=	t;
 approx	=	app(1:nb_it);
-err_abs	=	inf(nb_it,1);
+err_abs	=	inf(1,nb_it);
 
 if arret
 	err_abs		=	abs(approx(end) - approx);

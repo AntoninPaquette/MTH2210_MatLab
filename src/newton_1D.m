@@ -15,9 +15,9 @@ function [approx , err_abs] = newton_1D(f , df , x0 , nb_it_max , tol_rel , file
 %					lequel sera	écrit les résultats de l'algorithme
 %
 % Arguments de sortie
-%	approx		-	Vecteur colonne de taille nb_iter contenant les
+%	approx		-	Vecteur rangee de taille nb_iter contenant les
 %					itérations
-%	err_abs		-	Vecteur colonne de dimension nb_iter contenant les
+%	err_abs		-	Vecteur rangee de dimension nb_iter contenant les
 %					erreurs absolues
 %
 % Exemples d'appel
@@ -78,9 +78,9 @@ if nargin == 6 && ~isa(file_name,'char')
 end
 
 %% Initialisation des matrices app et err
-app			=	nan(nb_it_max,1);
+app			=	nan(1,nb_it_max);
 app(1)		=	x0;
-err_rel		=	inf(nb_it_max,1);
+err_rel		=	inf(1,nb_it_max);
 arret		=	false;
 
 
@@ -104,7 +104,7 @@ end
 
 nb_it	=	t+1;
 approx	=	app(1:nb_it);
-err_abs		=	inf(nb_it,1);
+err_abs		=	inf(1,nb_it);
 
 if arret
 	err_abs		=	abs(approx(end) - approx);

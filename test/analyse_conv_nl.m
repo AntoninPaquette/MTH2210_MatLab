@@ -28,6 +28,8 @@ err_ex_bis1		=	abs(approx_bis1-sqrt(10));
 err_ex_sec1		=	abs(approx_sec1-sqrt(10));
 err_ex_new1		=	abs(approx_new1-sqrt(10));
 
+order_computation_bissect(err_sec1)
+order_computation_nl(err_sec1,0.2)
 
 % Calcul des ratios
 
@@ -38,6 +40,13 @@ ratio2_sec_fct1			=	err_ex_sec1(2:end)./err_ex_sec1(1:end-1).^2;
 ratio1_new_fct1			=	err_ex_new1(2:end)./err_ex_new1(1:end-1);
 ratio_alpha_new_fct1	=	err_ex_new1(2:end)./err_ex_new1(1:end-1).^alpha;
 ratio2_new_fct1			=	err_ex_new1(2:end)./err_ex_new1(1:end-1).^2;
+
+figure
+loglog(err_ex_bis1(1:end-1),err_ex_bis1(2:end))
+hold on
+loglog(err_ex_sec1(1:end-1),err_ex_sec1(2:end))
+loglog(err_ex_new1(1:end-1),err_ex_new1(2:end))
+legend('Bissection','Secante','Newton')
 
 figure
 semilogy(1:length(err_ex_bis1),err_ex_bis1)
@@ -140,3 +149,42 @@ ratio2_sans_6	=	err_sans_6(2:end)./err_sans_6(1:end-1).^2;
 ratio1_avec_6	=	err_avec_6(2:end)./err_avec_6(1:end-1);
 ratio_alpha_avec_6	=	err_avec_6(2:end)./err_avec_6(1:end-1).^alpha;
 ratio2_avec_6	=	err_avec_6(2:end)./err_avec_6(1:end-1).^2;
+
+
+function [ordre,ordre_app] = order_computation_nl(erreur,varargin)
+
+	if nargin>2
+		error("Il ne peut y avoir qu'un deuxième argument, la tolérance spécifiée.")
+	elseif nargin == 2
+		tol = varargin{1};
+	else
+		tol = 0.2;
+	end
+	
+	ordre_app			=	log(erreur(2:end-1)./erreur(3:end))./log(erreur(1:end-2)./erreur(2:end-1));	
+	stable_region		=	(ordre_app>0) & (abs(gradient(ordre_app))<tol) & (abs(del2(ordre_app))<2*tol);
+	ind_stable_region	=	find(stable_region);
+	
+	% Sanity check
+	if isempty(ind_stable_region)
+		error("Il ne pas y avoir de zone asymptotique")
+	elseif length(ind_stable_region) < 2
+		warning("La zone asymptotique n'est pas très grande")
+	elseif any(gradient(ind_stable_region)~=1)
+		warning("La zone asymptotique est brisée")
+	end
+	
+	ordre = mean(ordre_app(ind_stable_region));
+end
+
+function [ordre] = order_computation_bissect(erreur)
+	
+	% Least-square fit
+	nb_iter	=	length(erreur);
+	A		=	[ones(nb_iter-2,1) reshape(log(erreur(1:end-2)),[],1)];
+	b		=	reshape(log(erreur(2:end-1)),[],1);
+	coeff	=	A\b;
+	
+	ordre	=	coeff(2);
+
+end

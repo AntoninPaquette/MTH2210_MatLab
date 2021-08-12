@@ -63,7 +63,6 @@ function testLagrangeOrder(testCase)
 		yi			=	fct(xi);
 		y_inter		=	lagrange(xi,yi,x_interet);
 		erreur(t)	=	abs(y_exact - y_inter);
-		erreur_rel(t)	=	abs(fct(x_interet) - y_inter)/abs(y_inter);
 	end
 	
 	tol = 0.2;
@@ -209,13 +208,13 @@ function [ordre,ordre_app] = order_computation(erreur,ratio_h,varargin)
 		tol = 0.2;
 	end
 	
-	ordre_app			=	log(erreur(1:end-1)./erreur(2:end))/log(ratio_h);	
+	ordre_app			=	log(erreur(1:end-1)./erreur(2:end))./log(ratio_h);	
 	stable_region		=	(ordre_app>0) & (abs(gradient(ordre_app))<tol);
 	ind_stable_region	=	find(stable_region);
 	
 	% Sanity check
 	if isempty(ind_stable_region)
-		error("Il ne pas y avoir de zone asymptotique")
+		error("Il n'y a pas de zone asymptotique")
 	elseif length(ind_stable_region) < 2
 		warning("La zone asymptotique n'est pas très grande")
 	elseif any(gradient(ind_stable_region)~=1)
