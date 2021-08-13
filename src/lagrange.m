@@ -3,11 +3,11 @@ function [ Lx ] = lagrange(xi , yi , x)
 %
 % Syntaxe: [ Ly ] = lagrange(xi , yi , x)
 %
-% Argument d'entrée
+% Argument d'entree
 %	xi		-	Vecteur contenant les abscisses des points d'interpolation
-%	yi		-	Vecteur contenant les ordonnées des points d'interpolation
+%	yi		-	Vecteur contenant les ordonnees des points d'interpolation
 %	x		-	Vecteur contenant les points où le polynôme de Lagrange 
-%				sera évalué
+%				sera evalue
 %
 % Arguments de sortie
 %	Lx		-	Vecteur contenant les valeurs du polynômes aux points x
@@ -27,21 +27,21 @@ function [ Lx ] = lagrange(xi , yi , x)
 % interpolation that is fast and stable. It deserves to be known as the
 % standard method of polynomial interpolation." (Berrut and Trefethen, 2004).
 %
-% Créé par D. Orban, 2009. 
-% Modifié par A. Paquette-Rufiange, 2018.
+% Cree par D. Orban, 2009. 
+% Modifie par A. Paquette-Rufiange, 2018.
 %
 
-%% Vérification des arguments d'entrées
+%% Verification des arguments d'entrees
 if ~isnumeric(xi) || ~isvector(xi)
-	error('Les abscisses xi ne sont pas arrangées en vecteur')
+	error('Les abscisses xi ne sont pas arrangees en vecteur')
 elseif ~isnumeric(yi) || ~isvector(yi)
-	error('Les ordonnées yi ne sont pas arrangées en vecteur')
+	error('Les ordonnees yi ne sont pas arrangees en vecteur')
 elseif length(xi) ~= length(yi)
 	error('Les vecteurs xi et yi doivent avoir la meme taille');
 elseif ~isnumeric(x) || ~isvector(x)
-	error('Les points où l''on évalue le polynome doivent être arrangées en vecteur');
+	error('Les points où l''on evalue le polynome doivent etre arrangees en vecteur');
 elseif isequal(xi,x)
-	warning('Le polynôme d''interpolation est évalué exactement au points d''interpolation')
+	warning('Le polynôme d''interpolation est evalue exactement au points d''interpolation')
 end
 
 

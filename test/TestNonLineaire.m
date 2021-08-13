@@ -14,6 +14,15 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 		x0_g	=	{1,1}
 		ordre	=	{1,2}
 		taux	=	{-2*sqrt(10)/10 + 1, 1/6}
+		
+		% Verification pour size des inputs
+		f_size	=	{@(x) [5*sin(0.1*x(1)*x(2)) - x(3) - (5*sin(-0.2)-5); ...
+						  x(1)^2 + x(2)^2 + x(3)^2 - 30; ...
+						  x(1) - x(2) - x(3) + 2],...
+					 @(x) [5*sin(0.1*x(1)*x(2)) - x(3) - (5*sin(-0.2)-5); ...
+						  x(1)^2 + x(2)^2 + x(3)^2 - 30; ...
+						  x(1) - x(2) - x(3) + 2]'}
+		x0_size	=	{[1.5,-3,4],[1.5,-3,4]'}
 	end
 	
 	
@@ -31,7 +40,7 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 		end
 		
 		function testSecante(testCase,fct,x0,racine)
-			% Ordre de convergence pour la methode de la sécante
+			% Ordre de convergence pour la methode de la secante
 
 			[app, err] = secante(fct, x0(1), x0(2), 20 ,1e-12);
 			
@@ -131,16 +140,86 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 			[ordre_app,~] = order_computation_nl(err,0.3);
 			verifyLessThan(testCase,abs(ordre_app-2),0.1);
 		end
+		
+		function testSizeNewton_ND_Sans_Der(testCase,f_size,x0_size)
+			% Robustesse face a l'orientation des vecteurs (rangee ou 
+			% colonne) pour les arguments d'entrees (sauf pour la matrice jacobienne) 
+					
+			[app , err] = newton_ND_sans_der(f_size, x0_size, 20, 1e-12);
+			
+			nb_iter		=	length(err);
+			
+			verifySize(testCase,app,[3,nb_iter]);
+			verifySize(testCase,err,[1,nb_iter]);
+			
+		end
+		
+		function testSizeNewton_ND_Avec_Der(testCase,f_size,x0_size)
+			% Robustesse face a l'orientation des vecteurs (rangee ou 
+			% colonne) pour les arguments d'entrees (sauf pour la matrice jacobienne) 
+			
+			jac_fct	=	@(x) [5*0.1*x(2)*cos(0.1*x(1)*x(2)) , 5*0.1*x(1)*cos(0.1*x(1)*x(2)) , -1 ;...
+							  2*x(1) , 2*x(2) , 2*x(3) ; ...
+							  1 , -1 , -1];
+					
+			[app , err] = newton_ND_avec_der(f_size, jac_fct, x0_size , 20 , 1e-12);
+			
+			nb_iter		=	length(err);
+			
+			verifySize(testCase,app,[3,nb_iter]);
+			verifySize(testCase,err,[1,nb_iter]);
+			
+		end
+		
+		function testBissecErrorFct(testCase)
+			% Verification message erreur pour fct 
+			verifyError(testCase,@() bissec(@fct_not_present, 1, 2, 200, 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() bissec(@fct_error, 1, 2, 200, 1e-12),"MATLAB:UndefinedFunction");
+		end
+		
+		function testSecanteErrorFct(testCase)
+			% Verification message erreur pour fct 
+			verifyError(testCase,@() secante(@fct_not_present, 1, 2, 200, 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() secante(@fct_error, 1, 2, 200, 1e-12),"MATLAB:UndefinedFunction");
+		end
+		
+		function testNewton_1DErrorFct(testCase)
+			% Verification message erreur pour fct
+			verifyError(testCase,@() newton_1D(@fct_not_present, @(x) 2*x, 1, 20, 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() newton_1D(@(x) x.^2-10, @fct_not_present, 1, 20, 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() newton_1D(@fct_error, @(x) 2*x, 1, 20, 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() newton_1D(@(x) x.^2-10, @fct_error, 1, 20, 1e-12),"MATLAB:UndefinedFunction");
+		end
+		
+		function testPts_FixesErrorFct(testCase)
+			% Verification message erreur pour fct
+			verifyError(testCase,@() pts_fixes(@fct_not_present, 1, 20, 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() pts_fixes(@fct_error, 1, 20, 1e-12),"MATLAB:UndefinedFunction");
+		end
+		
+		function testNewton_ND_Avec_DerErrorFct(testCase)
+			% Verification message erreur pour fct
+			verifyError(testCase,@() newton_ND_avec_der(@f_not_present, @(x) [2*x(1),0;0,2*x(2)], [1;1] , 20 , 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() newton_ND_avec_der(@(x) [x(1).^2-10;x(2).^2-11],@f_not_present, [1;1] , 20 , 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() newton_ND_avec_der(@fct_error, @(x) [2*x(1),0;0,2*x(2)], [1;1] , 20 , 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() newton_ND_avec_der(@(x) [x(1).^2-10;x(2).^2-11],@fct_error, [1;1] , 20 , 1e-12),"MATLAB:UndefinedFunction");
+		end	
+		
+		function testNewton_ND_Sans_DerErrorFct(testCase)
+			% Verification message erreur pour fct
+			verifyError(testCase,@() newton_ND_sans_der(@f_not_present, [1;1] , 20 , 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() newton_ND_sans_der(@fct_error, [1;1] , 20 , 1e-12),"MATLAB:UndefinedFunction");
+		end	
 	end
 	
 end
 
 function [ordre,ordre_app] = order_computation_nl(erreur,varargin)
-% Approximation de l'ordre pour les méthodes de resolution de problemes
+% Approximation de l'ordre pour les methodes de resolution de problemes
 % non-lineaires
 
 	if nargin>2
-		error("Il ne peut y avoir qu'un deuxième argument, la tolérance spécifiée.")
+		error("Il ne peut y avoir qu'un deuxieme argument, la tolerance specifiee.")
 	elseif nargin == 2
 		tol = varargin{1};
 	else
@@ -155,9 +234,9 @@ function [ordre,ordre_app] = order_computation_nl(erreur,varargin)
 	if isempty(ind_stable_region)
 		error("Il n'y a pas de zone asymptotique")
 	elseif length(ind_stable_region) < 2
-		warning("La zone asymptotique n'est pas très grande")
+		warning("La zone asymptotique n'est pas tres grande")
 	elseif any(gradient(ind_stable_region)~=1)
-		warning("La zone asymptotique est brisée")
+		warning("La zone asymptotique est brisee")
 	end
 	
 	ordre = mean(ordre_app(ind_stable_region));
@@ -181,7 +260,7 @@ function [taux,taux_app] = taux_computation_nl(erreur,ordre,varargin)
 % Approximation du taux de convergence
 
 	if nargin>3
-		error("Il ne peut y avoir qu'un troisième argument, la tolérance spécifiée.")
+		error("Il ne peut y avoir qu'un troisieme argument, la tolerance specifiee.")
 	elseif nargin == 3
 		tol = varargin{1};
 	else
@@ -196,11 +275,14 @@ function [taux,taux_app] = taux_computation_nl(erreur,ordre,varargin)
 	if isempty(ind_stable_region)
 		error("Il ne pas y avoir de zone asymptotique")
 	elseif length(ind_stable_region) < 2
-		warning("La zone asymptotique n'est pas très grande")
+		warning("La zone asymptotique n'est pas tres grande")
 	elseif any(gradient(ind_stable_region)~=1)
-		warning("La zone asymptotique est brisée")
+		warning("La zone asymptotique est brisee")
 	end
 	
 	taux = mean(taux_app(ind_stable_region));
 end
 
+function [f] = fct_error(x)
+	f = a*x;
+end

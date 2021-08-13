@@ -1,17 +1,17 @@
 function [str] = affichage_tableau(varargin)
-% AFFICHAGE_TABLEAU	Fonction permettant de créer un string mettant sous
+% AFFICHAGE_TABLEAU	Fonction permettant de creer un string mettant sous
 %					format un tableau de valeur avec leur titre
 %
 % Syntaxe: [str] = affichage_tableau(vecteur_1,titre_1,vecteur_2,titre_2)
 %
-% Arguments d'entrée  
-%	vecteur_i	-	Vecteur de donnees a afficher à la i-eme colonne 
+% Arguments d'entree  
+%	vecteur_i	-	Vecteur de donnees a afficher a la i-eme colonne 
 % 					(premier argument d'une paire) 
-%	titre_i		-	String spécifiant le titre de la i-eme colonne
+%	titre_i		-	String specifiant le titre de la i-eme colonne
 %					(deuxieme argument d'une paire)
 %
 % Arguments de sortie
-%	str			-	String contenant le tableau pouvant être affiche avec
+%	str			-	String contenant le tableau pouvant etre affiche avec
 %					la fonction fprintf 
 %
 % Exemples d'appel
@@ -19,27 +19,27 @@ function [str] = affichage_tableau(varargin)
 %	[ str ] = affichage_tableau(linspace(0,5,15),"x",cos(linspace(0,5,15)),"cos(x)")
 
 
-% Vérification du nombre d'inputs
+% Verification du nombre d'inputs
 if rem(nargin,2) ~= 0
-	error("Les entrées doivent être en paire vecteur/titre.")
+	error("Les entrees doivent etre en paire vecteur/titre.")
 end
 nb_cols = nargin/2;
 
-% Vérification des inputs
+% Verification des inputs
 for t=1:nb_cols
 	if ~isvector(varargin{2*t-1})
-		error("Les premiers éléments des paires doivent être des vecteurs.")
+		error("Les premiers elements des paires doivent etre des vecteurs.")
 	end
 	if ~isa(varargin{2*t},"string")
-		error("Les deuxièmes éléments des paires doivent être des strings.")
+		error("Les deuxiemes elements des paires doivent etre des strings.")
 	end
 end
 
-% Vérification de la taille des vecteurs
+% Verification de la taille des vecteurs
 nb_rows = length(varargin{1});
 for t=1:nb_cols
 	if length(varargin{2*t-1}) ~= nb_rows
-		error("Les vecteurs doivent être de même taille")
+		error("Les vecteurs doivent etre de meme taille")
 	end
 end
 
@@ -64,17 +64,17 @@ for t=1:nb_cols
 end
 titre = titre + "\n";
 
-% Vérification de la taille totale du tableau
+% Verification de la taille totale du tableau
 taille_tot = sum(taille) + 3*nb_cols + 1;
 if taille_tot > 109
-	warning("Le tableau affiché est peut-être trop large.")
+	warning("Le tableau affiche est peut-etre trop large.")
 end
 
 % Affichage du titre
 str		=	sprintf(titre);
 str		=	str + sprintf(join(repmat("-",1,taille_tot),"")+"\n");
 
-% Affichage des données
+% Affichage des donnees
 for rows=1:nb_rows
 	str		=	str + sprintf("| ");
 	for cols=1:nb_cols

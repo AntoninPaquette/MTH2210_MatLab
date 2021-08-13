@@ -37,17 +37,20 @@ err_rel2	=	norm(y_exacte - y_inter)/norm(y_exacte);
 
 %% Vérification avec un fonction quelconque
 
-fct3	=	@(x) cos(x);
+fct3	=	@(x) exp(x);
 
-degre	=	2;
+degre	=	4;
 nb_pts	=	degre + 1;
 nb_loop		=	10;
 
-x_interet	=	1/2^nb_loop;
+x_interet	=	(1/3)^nb_loop;
 erreur		=	nan(nb_loop,1);
 
 for t=1:nb_loop
-	xi	=	linspace(-1/2^(t-1),1/2^(t-1),nb_pts);
+	a	=	0;
+	b	=	(1/2)^(t-1);
+	k	=	1:nb_pts;
+	xi	=	1/2*(a+b) + 1/2*(b-a)*cos((2*k-1)*pi/(2*nb_pts));
 	yi	=	fct3(xi);
 	
 	y_inter		=	lagrange(xi,yi,x_interet);

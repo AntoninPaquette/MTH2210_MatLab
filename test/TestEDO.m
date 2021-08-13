@@ -7,6 +7,13 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 		algo_degre4 =	{@rk4}
 		
 		ordre		=	{1,1,2,2,2,4}
+		
+		% Verification pour size des inputs
+		f_size		=	{@(t,y) [-2,1;1,-2]*y + [2*exp(-t);3*t], ...
+						@(t,y) [-2,1;1,-2]*y(:) + [2*exp(-t);3*t],...
+						@(t,y) ([-2,1;1,-2]*y(:) + [2*exp(-t);3*t])'}
+		y0_size		=	{[2,3],[2;3]}
+		tspan_size	=	{[0,5],[0;5]}
 	end
 	
 	methods (Test)
@@ -47,11 +54,30 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 			
 			verifyLessThan(testCase,erreur_rel,1e-14);
 		end
+		
+		function testSize(testCase,algo,f_size,tspan_size,y0_size)
+			% Robustesse face a l'orientation des vecteurs (rangee ou 
+			% colonne) pour les arguments d'entrees 
+			
+			nb_pas	=	5;
+			[temps , y]	=	algo(f_size ,tspan_size, y0_size, nb_pas);
+			
+			verifySize(testCase,temps,[1,nb_pas+1]);
+			verifySize(testCase,y,[2,nb_pas+1]);
+		end
+		
+		function testErrorFct(testCase,algo)
+			% Verification message erreur pour fct 
+			
+			verifyError(testCase,@() algo(@fct_not_present ,[0,1], 1, 10),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() algo(@fct_error ,[0,1], 1, 10),"MATLAB:UndefinedFunction");
+
+		end
 	end
 	
 	methods (Test, ParameterCombination = 'sequential')
 		function testOrdreScalar(testCase,algo,ordre)
-			% Ordre de convergence pour une EDO (pour toutes les méthodes)
+			% Ordre de convergence pour une EDO (pour toutes les methodes)
 			
 			fct		=	@(t,y) 2*y -t + 4;
 			y0		=	1;
@@ -106,7 +132,7 @@ function [ordre,ordre_app] = order_computation(erreur,ratio_h,varargin)
 % Approximation de l'ordre de convergence
 
 	if nargin>3
-		error("Il ne peut y avoir qu'un troisième argument, la tolérance spécifiée.")
+		error("Il ne peut y avoir qu'un troisieme argument, la tolerance specifiee.")
 	elseif nargin == 3
 		tol = varargin{1};
 	else
@@ -121,12 +147,16 @@ function [ordre,ordre_app] = order_computation(erreur,ratio_h,varargin)
 	if isempty(ind_stable_region)
 		error("Il n'y a pas de zone asymptotique")
 	elseif length(ind_stable_region) < 2
-		warning("La zone asymptotique n'est pas très grande")
+		warning("La zone asymptotique n'est pas tres grande")
 	elseif any(gradient(ind_stable_region)~=1)
-		warning("La zone asymptotique est brisée")
+		warning("La zone asymptotique est brisee")
 	end
 	
 	ordre = mean(ordre_app(ind_stable_region));
+end
+
+function [f] = fct_error(~,y)
+	f = a*y;
 end
 
 

@@ -1,22 +1,22 @@
 function [approx , err_abs] = newton_ND_avec_der(F , mat_jac , x0 , nb_it_max , tol_rel , file_name)
-% NEWTON_ND_AVEC_DER	Méthode de Newton pour la résolution de F(x) = 0, pour F: R^n -> R^n
+% NEWTON_ND_AVEC_DER	Methode de Newton pour la resolution de F(x) = 0, pour F: R^n -> R^n
 %
 % Syntaxe: [approx , err_abs] = newton_ND_avec_der(F , mat_jac , x0 , nb_it_max , tol_rel , file_name)
 %
-% Arguments d'entrée
-%	F			-	String ou fonction handle spécifiant la fonction
-%					non-linéaire (F: R^n -> R^n)
-%	mat_jac		-	String ou function handle spécifiant la matrice
+% Arguments d'entree
+%	F			-	String ou fonction handle specifiant la fonction
+%					non-lineaire (F: R^n -> R^n)
+%	mat_jac		-	String ou function handle specifiant la matrice
 %					jacobienne de F (Jac: R^n -> R^{n x n})
 %	x0			-	Approximation initiale (x0 dans R^n)
-%	nb_it_max	-	Nombre maximum d'itérations 
-%	tol_rel		-	Tolérance sur l'approximation de l'erreur relative
+%	nb_it_max	-	Nombre maximum d'iterations 
+%	tol_rel		-	Tolerance sur l'approximation de l'erreur relative
 %	file_name	-	(Optionnel) Nom du fichier (avec l'extension .txt) dans
-%					lequel sera	écrit les résultats de l'algorithme
+%					lequel sera	ecrit les resultats de l'algorithme
 %
 % Arguments de sortie
 %	approx		-	Matrice de taille (n x nb_iter) contenant les 
-%					itérations
+%					iterations
 %	err_abs		-	Vecteur rangee de dimension nb_iter contenant les
 %					erreurs absolues
 %
@@ -26,7 +26,7 @@ function [approx , err_abs] = newton_ND_avec_der(F , mat_jac , x0 , nb_it_max , 
 
 
 
-%%  Vérification de la fonction F et de la matrice jacobienne
+%%  Verification de la fonction F et de la matrice jacobienne
 if isa(F,'char')
 	fct			=	str2func(F);
 	is_fct_file =	true;
@@ -47,7 +47,7 @@ else
 	error('L''argument df n''est pas un string ni un function_handle')
 end
 
-%% Vérification du nb de composantes des approximations initiales et de f
+%% Verification du nb de composantes des approximations initiales et de f
 if ~isnumeric(x0) || ~isvector(x0)
 	error('L''approximation initiale x0 n''est pas un vecteur')
 end
@@ -69,7 +69,7 @@ end
 taille	=	length(x0_col);
 
 if ~isnumeric(fct(x0_col)) || ~isvector(fct(x0_col)) || (length(fct(x0_col))~=taille)
-	error(['Le fonction F ne retourne pas un vecteur de même taille que x0. ',...
+	error(['Le fonction F ne retourne pas un vecteur de meme taille que x0. ',...
 		'x0 est de taille %d alors que F(x0) est de taille %d.'],taille,length(fct(x0)))
 elseif ~isnumeric(jac(x0_col)) || ~ismatrix(jac(x0_col)) || ~isequal(size(jac(x0_col)),[taille,taille]) 
 	error(['Le fonction mat_jac ne retourne pas une matrice de bonne taille; ',...
@@ -79,9 +79,9 @@ elseif ~check_derivative(fct,jac,x0_col)
 	warning('Il semble y avoir une erreur avec la matrice jacobienne')
 end
 
-%% Vérification du fichier output
+%% Verification du fichier output
 if nargin == 6 && ~isa(file_name,'char')
-	error('Le nom du fichier des résultats doit être de type string')
+	error('Le nom du fichier des resultats doit etre de type string')
 end
 
 %% Initialisation des matrices app et err
@@ -91,7 +91,7 @@ err_rel		=	inf(1,nb_it_max);
 arret		=	false;
 
 
-%% Méthode de Newton
+%% Methode de Newton
 for t=1:nb_it_max-1
 	
 	jacobienne	=	jac(app(:,t));
@@ -99,14 +99,14 @@ for t=1:nb_it_max-1
 	app(:,t+1)	=	app(:,t) + delta_x;
 	
 	if any(~isfinite(jacobienne(:)))
-		warning(['La matrice jacobienne de f à l''itération %d est singulière 0.\n',...
-					'Arrêt de l''algorithme'],t)
+		warning(['La matrice jacobienne de f a l''iteration %d est singuliere 0.\n',...
+					'Arret de l''algorithme'],t)
 		break
 	end
 	
 	if min(abs(eig(jacobienne))) == 0  
-		warning(['La matrice jacobienne de f à l''itération %d est singulière 0.\n',...
-					'Arrêt de l''algorithme'],t)
+		warning(['La matrice jacobienne de f a l''iteration %d est singuliere 0.\n',...
+					'Arret de l''algorithme'],t)
 		break
 	end
 	
@@ -127,10 +127,10 @@ if arret
 		err_abs(t)	=	norm(approx(:,end) - approx(:,t));
 	end
 else
-	warning('La méthode de Newton n''a pas convergée')
+	warning('La methode de Newton n''a pas convergee')
 end
 
-% Écriture des résultats si fichier passé en argument
+% ecriture des resultats si fichier passe en argument
 if nargin == 6
 	output_results(file_name , fct , is_fct_file , jac, is_jac_file, ...
 				nb_it_max , tol_rel , x0 , approx , err_abs , arret)
@@ -185,9 +185,9 @@ function [] = output_results(file_name , fct , is_fct_file , jac, ...
 	else
 		fprintf(fid,'%s\n\n',func2str(jac));
 	end
-	fprintf(fid,'Arguments d''entrée:\n');
-	fprintf(fid,'    - Nombre maximum d''itérations: %d\n',it_max);
-	fprintf(fid,'    - Tolérance relative: %6.5e\n',tol_rel);
+	fprintf(fid,'Arguments d''entree:\n');
+	fprintf(fid,'    - Nombre maximum d''iterations: %d\n',it_max);
+	fprintf(fid,'    - Tolerance relative: %6.5e\n',tol_rel);
 	fprintf(fid,'    - Approximation initiale x0: [');
 	[taille, nb_iter]	=	size(x);
 	if taille <= 3
@@ -199,9 +199,9 @@ function [] = output_results(file_name , fct , is_fct_file , jac, ...
 	end
 	
 	if status
-		fprintf(fid,'\nStatut: L''algorithme de Newton a convergé en %d itérations\n\n',nb_iter-1);
+		fprintf(fid,'\nStatut: L''algorithme de Newton a converge en %d iterations\n\n',nb_iter-1);
 	else
-		fprintf(fid,'\nStatut: L''algorithme de Newton n''a pas convergé\n\n');
+		fprintf(fid,'\nStatut: L''algorithme de Newton n''a pas converge\n\n');
 	end
 	if taille == 1
 		fprintf(fid,'#It       x_1           Erreur absolue\n');

@@ -8,8 +8,8 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 		
 		degre_for_order =	{1,2,3,4,5}
 				
-		% Spline décrite par la fonction spline_example ci-dessous avec
-		% bc1 en x=0 et bc2 en x=4. Les conditions frontière sont:
+		% Spline decrite par la fonction spline_example ci-dessous avec
+		% bc1 en x=0 et bc2 en x=4. Les conditions frontiere sont:
 		% S'(0)=0 , S''(0) = 2 , S'(4) = -16 et S''(4) = -10.
 		spline_type_bc1	=	{2,2,2,3,3,3,4,4,4}
 		spline_type_bc2	=	{2,3,4,2,3,4,2,3,4}
@@ -33,9 +33,9 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 		end
 		
 		function testSplineExact1(testCase,spline_type_bc1,spline_type_bc2,spline_bc1,spline_bc2)
-			% Interpolation exacte de la spline décrite dans la fonction 
+			% Interpolation exacte de la spline decrite dans la fonction 
 			% spline_example avec toute les combinaisons de condition
-			% frontière courbure prescrite (2), courbure constante (3) et
+			% frontiere courbure prescrite (2), courbure constante (3) et
 			% pente prescrite (4)
 			
 			xi	=	[0,1,3,4];
@@ -136,7 +136,7 @@ function [ordre,ordre_app] = order_computation(erreur,ratio_h,varargin)
 % Approximation de l'ordre de convergence
 
 	if nargin>3
-		error("Il ne peut y avoir qu'un troisième argument, la tolérance spécifiée.")
+		error("Il ne peut y avoir qu'un troisieme argument, la tolerance specifiee.")
 	elseif nargin == 3
 		tol = varargin{1};
 	else
@@ -151,9 +151,9 @@ function [ordre,ordre_app] = order_computation(erreur,ratio_h,varargin)
 	if isempty(ind_stable_region)
 		error("Il n'y a pas de zone asymptotique")
 	elseif length(ind_stable_region) < 2
-		warning("La zone asymptotique n'est pas très grande")
+		warning("La zone asymptotique n'est pas tres grande")
 	elseif any(gradient(ind_stable_region)~=1)
-		warning("La zone asymptotique est brisée")
+		warning("La zone asymptotique est brisee")
 	end
 	
 	ordre = mean(ordre_app(ind_stable_region));

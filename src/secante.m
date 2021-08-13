@@ -1,22 +1,22 @@
 function [approx , err_abs] = secante(f , x0 , x1 , nb_it_max , tol_rel , file_name)
-% SECANTE	Méthode de la sécante pour la résolution f(x) = 0
+% SECANTE	Methode de la secante pour la resolution f(x) = 0
 %			pour f: R -> R
 %
 % Syntaxe: [approx , err_abs] = secante(f , x0 , x1 , nb_it_max , tol_rel)
 %
-% Arguments d'entrée
-%	f			-	String ou fonction handle spécifiant la fonction
-%					non-linéaire
-%	x0			-	1ère approximation initiale
-%	x1			-	2ème approximation initiale
-%	nb_it_max	-	Nombre maximum d'itérations
-%	tol_rel		-	Tolérance sur l'approximation de l'erreur relative
+% Arguments d'entree
+%	f			-	String ou fonction handle specifiant la fonction
+%					non-lineaire
+%	x0			-	1ere approximation initiale
+%	x1			-	2eme approximation initiale
+%	nb_it_max	-	Nombre maximum d'iterations
+%	tol_rel		-	Tolerance sur l'approximation de l'erreur relative
 %	file_name	-	(Optionnel) Nom du fichier (avec l'extension .txt) dans
-%					lequel sera	écrit les résultats de l'algorithme
+%					lequel sera	ecrit les resultats de l'algorithme
 %
 % Arguments de sortie
 %	approx		-	Vecteur rangee de taille nb_iter contenant les
-%					itérations
+%					iterations
 %	err_abs		-	Vecteur rangee de dimension nb_iter contenant les
 %					erreurs absolues
 %
@@ -25,7 +25,7 @@ function [approx , err_abs] = secante(f , x0 , x1 , nb_it_max , tol_rel , file_n
 %	[ approx , err_abs ] = secante( @(x) x.^2-10 , 3 , 4 , 100 , 1e-9 , 'resul_secante.txt')
 
 
-%%  Vérification de la fonction f
+%%  Verification de la fonction f
 if isa(f,'char')
 	fct		=	str2func(f);
 	is_fct_file = true;
@@ -36,7 +36,7 @@ else
 	error('L''argument f n''est pas un string ni un function_handle')
 end
 
-%% Vérification du nb de composantes de l'approximation initiale et de f
+%% Verification du nb de composantes de l'approximation initiale et de f
 if ~isnumeric(x0) || ~isscalar(x0)
 	error('L''approximation initiale x0 n''est pas un scalaire')
 elseif ~isnumeric(x1) || ~isscalar(x1)
@@ -53,9 +53,9 @@ if ~isnumeric(fct(x0)) || ~isscalar(fct(x0))
 	error('Le fonction f ne retourne pas un scalaire')
 end
 
-%% Vérification du fichier output
+%% Verification du fichier output
 if nargin == 6 && ~isa(file_name,'char')
-	error('Le nom du fichier des résultats doit être de type string')
+	error('Le nom du fichier des resultats doit etre de type string')
 end
 
 %% Initialisation des matrices app et err
@@ -67,16 +67,16 @@ err_rel(1)  =	(x1 - x0)/(x1+eps);
 arret		=	false;
 
 
-%% Méthode de la sécante
+%% Methode de la secante
 for t=2:nb_it_max-1
 
 	app(t+1)	=	app(t) - fct(app(t)) * (app(t) - app(t-1))/...
 										   (fct(app(t)) - fct(app(t-1)));
 
 	if abs(fct(app(t)) - fct(app(t-1))) == 0
-		warning(['L''approximation de la dérivée de f à l''aide des ',...
+		warning(['L''approximation de la derivee de f a l''aide des ',...
 			   'points x_i=%6.5e et x_{i-1}=%6.5e ',...
-			   'est exactement 0.\nArrêt de l''algorithme\n'],app(t),app(t-1))
+			   'est exactement 0.\nArret de l''algorithme\n'],app(t),app(t-1))
 		break
 	end
 
@@ -94,10 +94,10 @@ err_abs		=	inf(1,nb_it);
 if arret
 	err_abs		=	abs(approx(end) - approx);
 else
-	warning('La méthode de la sécante n''a pas convergée')
+	warning('La methode de la secante n''a pas convergee')
 end
 
-% Écriture des résultats si fichier passé en argument
+% ecriture des resultats si fichier passe en argument
 if nargin == 6
 	output_results(file_name , fct , is_fct_file , nb_it_max , ...
 					tol_rel , x0 , x1 , approx , err_abs , arret)
@@ -109,23 +109,23 @@ function [] = output_results(file_name , fct , is_fct_file , it_max , ...
 							tol_rel , x0 , x1 , x , err , status)
 						 
 	fid		=	fopen(file_name,'w');
-	fprintf(fid,'Algorithme de la sécante\n\n');
+	fprintf(fid,'Algorithme de la secante\n\n');
 	fprintf(fid,'Fonction dont on cherche les racines:\n');
 	if is_fct_file
 		fprintf(fid,'%s\n\n',fileread([func2str(fct),'.m']));
 	else
 		fprintf(fid,'%s\n\n',func2str(fct));
 	end
-	fprintf(fid,'Arguments d''entrée:\n');
-	fprintf(fid,'    - Nombre maximum d''itérations: %d\n',it_max);
-	fprintf(fid,'    - Tolérance relative: %6.5e\n',tol_rel);
+	fprintf(fid,'Arguments d''entree:\n');
+	fprintf(fid,'    - Nombre maximum d''iterations: %d\n',it_max);
+	fprintf(fid,'    - Tolerance relative: %6.5e\n',tol_rel);
 	fprintf(fid,'    - Approximation initiale x0: %16.15e\n',x0);
 	fprintf(fid,'    - Approximation initiale x1: %16.15e\n\n',x1);
 	
 	if status
-		fprintf(fid,'\nStatut: L''algorithme de la sécante a convergé en %d itérations\n\n',length(x)-2);
+		fprintf(fid,'\nStatut: L''algorithme de la secante a converge en %d iterations\n\n',length(x)-2);
 	else
-		fprintf(fid,'\nStatut: L''algorithme de la sécante n''a pas convergé\n\n');
+		fprintf(fid,'\nStatut: L''algorithme de la secante n''a pas converge\n\n');
 	end
 	fprintf(fid,'#It            x              Erreur absolue\n');
 	fprintf(fid,'%3d   %16.15e   %6.5e\n',[reshape(0:length(x)-1,1,[]);reshape(x,1,[]);reshape(err,1,[])]);

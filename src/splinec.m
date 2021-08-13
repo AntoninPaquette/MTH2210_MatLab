@@ -1,30 +1,30 @@
 function [ Sx ] = splinec( xi , yi , x , type_S , val_S)
-% SPLINEC	Spline cubique passant par les points xi et yi avec différents 
-%			type de conditions frontières
+% SPLINEC	Spline cubique passant par les points xi et yi avec differents 
+%			type de conditions frontieres
 %
 % Syntaxe: [ Sx ] = splinec( xi , yi , x , type_f , val_f)
 %
-% Argument d'entrée
+% Argument d'entree
 %	xi		-	Vecteur contenant les abscisses des points d'interpolation
-%	yi		-	Vecteur contenant les ordonnées des points d'interpolation
-%	x		-	Vecteur contenant les points où la spline sera évalué
+%	yi		-	Vecteur contenant les ordonnees des points d'interpolation
+%	x		-	Vecteur contenant les points où la spline sera evalue
 %	type_S	-	Vecteur de dimension 2 contenant le type des conditions 
-%				frontières imposées en x0 et xn. Les choix possibles sont:
+%				frontieres imposees en x0 et xn. Les choix possibles sont:
 %					[1,1] -> Spline naturelle 
 %					[2,2] -> Spline avec courbure prescrite
 %					[3,3] -> Spline avec courbure constante
 %					[4,4] -> Spline avec pente prescrite
-%					[i,j] -> Spline avec condition i imposée en x0 et 
-%							 condition j imposée en xn
+%					[i,j] -> Spline avec condition i imposee en x0 et 
+%							 condition j imposee en xn
 %							 	
 %	val_S	-	Vecteur de dimension 2 contenant les deux conditions 
-%				limites imposées en x0 et xn. Les choix possibles sont:
+%				limites imposees en x0 et xn. Les choix possibles sont:
 %					- Si type_S(1) = 1 ou 3, alors val_S(1) = nan
 %					- Si type_S(1) = 2 ou 4, alors val_S(1) = a, où a 
-%					  représente resp. la courbure ou la pente en x0
+%					  represente resp. la courbure ou la pente en x0
 %					- Si type_S(2) = 1 ou 3, alors val_S(1) = nan
 %					- Si type_S(2) = 2 ou 4, alors val_S(1) = b, où b 
-%					  représente resp. la courbure ou la pente en xn
+%					  represente resp. la courbure ou la pente en xn
 %
 % Arguments de sortie
 %	Sx		-	Vecteur contenant les valeurs de la spline aux points x
@@ -37,23 +37,23 @@ function [ Sx ] = splinec( xi , yi , x , type_S , val_S)
 %	[ Sx ] = splinec([1,2,4,5], [1,9,2,11], linspace(1,5), [3,4] , [nan,-10])
 
 
-%% Vérification des arguments d'entrées
+%% Verification des arguments d'entrees
 if ~isnumeric(xi) || ~isvector(xi)
-	error('Les abscisses xi ne sont pas arrangées en vecteur')
+	error('Les abscisses xi ne sont pas arrangees en vecteur')
 elseif ~isequal(sort(xi),xi)
-	error('Les abscisses ne sont pas arrangées en ordre croissant')
+	error('Les abscisses ne sont pas arrangees en ordre croissant')
 elseif ~isnumeric(yi) || ~isvector(yi)
-	error('Les ordonnées yi ne sont pas arrangées en vecteur')
+	error('Les ordonnees yi ne sont pas arrangees en vecteur')
 elseif length(xi) ~= length(yi)
 	error('Les vecteurs xi et yi doivent avoir la meme taille');
 elseif ~isnumeric(x) || ~isvector(x)
-	error('Les points où l''on évalue la spline cubique doivent être arrangées en vecteur');
+	error('Les points où l''on evalue la spline cubique doivent etre arrangees en vecteur');
 elseif isequal(xi,x)
-	warning('Le polynôme d''interpolation est évalué exactement au points d''interpolation')
+	warning('Le polynôme d''interpolation est evalue exactement au points d''interpolation')
 elseif ~isnumeric(type_S) || ~isvector(type_S) || length(type_S)~=2 || ~any(type_S(1)==[1,2,3,4]) || ~any(type_S(2)==[1,2,3,4])
-	error('Les types de conditions frontières ne sont pas valide')
+	error('Les types de conditions frontieres ne sont pas valide')
 elseif ~isnumeric(val_S) || ~isvector(val_S) || length(val_S)~=2
-	error('Les valeurs des conditions frontières ne sont pas dans un vecteur de dimension 2')
+	error('Les valeurs des conditions frontieres ne sont pas dans un vecteur de dimension 2')
 end
 
 
@@ -67,7 +67,7 @@ denom	=	h(1:end-1)+h(2:end);
 M			=	[[h(1:end-1)./denom,0,0]',[0;2*ones(nb_f-2,1);0],[0,0,h(2:end)./denom]'];
 matrice		=	spdiags(M,[-1,0,1],nb_f,nb_f);
 
-% Calcul des 2ème différences divisées
+% Calcul des 2eme differences divisees
 mat_diff_div1	=	diff_div(xi,yi,1);
 mat_diff_div2	=	diff_div(xi,mat_diff_div1,2);
 
@@ -75,7 +75,7 @@ mat_diff_div2	=	diff_div(xi,mat_diff_div1,2);
 B	=	zeros(nb_f,1);
 B(2:end-1)	=	6*mat_diff_div2;
 
-% Imposition des conditions frontières
+% Imposition des conditions frontieres
 switch type_S(1)
 	case 1
 		matrice(1,1)		=	1;
@@ -106,7 +106,7 @@ switch type_S(2)
 		B(end)					=	6/h(end) * (val_S(2) - (yi(end) - yi(end-1))/h(end));
 end
 
-% Résolution du système linéaire
+% Resolution du systeme lineaire
 Spp		=	matrice\B;
 
 
