@@ -1,4 +1,5 @@
-classdef TestInterpolation < matlab.unittest.TestCase
+classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
+        '../src')}) TestInterpolation < matlab.unittest.TestCase
 	
 	properties (TestParameter)
 		% Interpolation exacte de polynomes

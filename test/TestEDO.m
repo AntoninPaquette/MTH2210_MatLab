@@ -1,4 +1,5 @@
-classdef TestEDO < matlab.unittest.TestCase
+classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
+        '../src')}) TestEDO < matlab.unittest.TestCase
 	
 	properties (TestParameter)
 		algo		=	{@euler_exp, @euler_imp, @euler_mod, @pt_milieu, @crank_nic, @rk4} 
@@ -76,8 +77,8 @@ classdef TestEDO < matlab.unittest.TestCase
 		function testOrdreSystem(testCase,algo,ordre)
 			% Ordre de convergence pour un systeme EDO (pour toutes les methodes)
 
-			fct		=	@(t,y) [-2,1;1,-2]*y(:) + [2*exp(-t);3*t];
-			y0		=	[2;3];
+			fct		=	@(t,y) [-2,1;1,-2]*y + [2*exp(-t);3*t];
+			y0		=	[2,3];
 			y_ex	=	@(t) -7/6*[1;-1]*exp(-3*t) + 4*[1;1]*exp(-t) + ...
 							1/2*[1;-1]*exp(-t) + [1;1]*t.*exp(-t) + [1;2]*t -1/3*[4;5];
 			tspan	=	[0,5];
@@ -93,7 +94,7 @@ classdef TestEDO < matlab.unittest.TestCase
 			end
 			
 			tol	=	0.2;
-			[ordre_app,~] = order_computation(erreur,2,tol)
+			[ordre_app,~] = order_computation(erreur,2,tol);
 			
 			verifyLessThan(testCase,abs(ordre_app-ordre),tol);
 		end

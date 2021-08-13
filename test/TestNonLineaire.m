@@ -1,10 +1,12 @@
-classdef TestNonLineaire < matlab.unittest.TestCase
+classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
+        '../src')}) TestNonLineaire < matlab.unittest.TestCase
 	
 	properties (TestParameter)
 		% 2 fonctions avec leurs derivees et racines
-		fct		=	{@(x) x^2 - 10, @(x) exp(x) - x^3}
+		fct		=	{@(x) x^2 - 10, @(x) exp(x) - x^3 - (exp(pi) - pi^3)}
 		dfct	=	{@(x) 2*x, @(x) exp(x) - 3*x^2}
-		x0		=	{[2,5],[1.5,2.5]}
+		x0		=	{[2,4],[2.75,3.25]}
+		racine	=	{sqrt(10),pi}
 		
 		% 2 fonction avec leur point-fixe, ordre et taux de convergence
 		g		=	{@(x) -x^2/10 + x + 1, @(x) -x^2/6 + x + 9/6}
@@ -17,27 +19,36 @@ classdef TestNonLineaire < matlab.unittest.TestCase
 	
 	methods (Test, ParameterCombination = 'sequential')
 		
-		function testBissecOrder(testCase,fct,x0)
+		function testBissec(testCase,fct,x0,racine)
 			% Ordre de convergence pour la methode de la bissection
 			
-			[~, err] = bissec(fct, x0(1), x0(2), 200 ,1e-12);
+			[app, err] = bissec(fct, x0(1), x0(2), 200 ,1e-12);
+			
+			verifyLessThan(testCase,abs(app(end)-racine),1e-11);
+			
 			[ordre_app] = order_computation_bissec(err);
 			verifyLessThan(testCase,abs(ordre_app-1),0.1);
 		end
 		
-		function testSecanteOrder(testCase,fct,x0)
+		function testSecante(testCase,fct,x0,racine)
 			% Ordre de convergence pour la methode de la sécante
 
-			[~, err] = secante(fct, x0(1), x0(2), 20 ,1e-12);
-			[ordre_app,~] = order_computation_nl(err);
+			[app, err] = secante(fct, x0(1), x0(2), 20 ,1e-12);
+			
+			verifyLessThan(testCase,abs(app(end)-racine),1e-11);
+			
+			[ordre_app] = order_computation_nl(err,0.4);
 			verifyLessThan(testCase,abs(ordre_app-(1+sqrt(5))/2),0.1);
 		end
 		
-		function testNewton_1DOrder(testCase,fct,dfct,x0)
+		function testNewton_1D(testCase,fct,dfct,x0,racine)
 			% Ordre de convergence pour la methode de Newton
 
-			[~, err] = newton_1D(fct, dfct, x0(1), 20 ,1e-12);
-			[ordre_app,~] = order_computation_nl(err,0.4);
+			[app, err] = newton_1D(fct, dfct, x0(1), 20 ,1e-12);
+			
+			verifyLessThan(testCase,abs(app(end)-racine),1e-11);
+			
+			[ordre_app] = order_computation_nl(err,0.4);
 			verifyLessThan(testCase,abs(ordre_app-2),0.1);
 		end
 		
@@ -84,36 +95,40 @@ classdef TestNonLineaire < matlab.unittest.TestCase
 		function testNewton_ND_Sans_DerOrder(testCase)
 			% Ordre de convergence pour la methode de Newton (avec derivee
 			% approximee) pour un systeme non-lineaire
-			fct_syst	=	@(x) [5*sin(0.1*x(1)*x(2)) - x(3) , ...
-						  x(1)^2 + x(2)^2 + x(3)^2 - 9 , ...
-						  x(1) - x(2) - x(3) - 1];
-						  
-			x0_syst	=	[1;1;1];
+			fct_syst	=	@(x) [5*sin(0.1*x(1)*x(2)) - x(3) - (5*sin(-0.2)-5); ...
+						  x(1)^2 + x(2)^2 + x(3)^2 - 30; ...
+						  x(1) - x(2) - x(3) + 2]';
 			
-			[~ , err] = newton_ND_sans_der(fct_syst , x0_syst , 20 , 1e-12);
+			racine_syst		=	[1;-2;5];		  
+			x0_syst	=	[1.5;-3;4];
 			
-			[ordre_app,~] = order_computation_nl(err,0.4);
-
+			[app , err] = newton_ND_sans_der(fct_syst , x0_syst , 20 , 1e-12);
+			
+			verifyLessThan(testCase,norm(app(:,end)-reshape(racine_syst,[],1)),1e-11);
+			
+			[ordre_app,~] = order_computation_nl(err,0.3);
 			verifyLessThan(testCase,abs(ordre_app-2),0.1);
 		end
 		function testNewton_ND_Avec_DerOrder(testCase)
 			% Ordre de convergence pour la methode de Newton (avec derivee
 			% exacte) pour un systeme non-lineaire
 			
-			fct_syst	=	@(x) [5*sin(0.1*x(1)*x(2)) - x(3) , ...
-						  x(1)^2 + x(2)^2 + x(3)^2 - 9 , ...
-						  x(1) - x(2) - x(3) - 1];
+			fct_syst	=	@(x) [5*sin(0.1*x(1)*x(2)) - x(3) - (5*sin(-0.2)-5); ...
+						  x(1)^2 + x(2)^2 + x(3)^2 - 30; ...
+						  x(1) - x(2) - x(3) + 2];
 			
 			jac_fct	=	@(x) [5*0.1*x(2)*cos(0.1*x(1)*x(2)) , 5*0.1*x(1)*cos(0.1*x(1)*x(2)) , -1 ;...
 							  2*x(1) , 2*x(2) , 2*x(3) ; ...
 							  1 , -1 , -1];
 						  
-			x0_syst	=	[1;1;1];
+			racine_syst		=	[1;-2;5];		  
+			x0_syst	=	[1.5,-3,4];
 			
-			[~ , err] = newton_ND_avec_der(fct_syst, jac_fct, x0_syst , 20 , 1e-12);
+			[app , err] = newton_ND_avec_der(fct_syst, jac_fct, x0_syst , 20 , 1e-12);
 			
-			[ordre_app,~] = order_computation_nl(err,0.4);
-
+			verifyLessThan(testCase,norm(app(:,end)-reshape(racine_syst,[],1)),1e-11);
+			
+			[ordre_app,~] = order_computation_nl(err,0.3);
 			verifyLessThan(testCase,abs(ordre_app-2),0.1);
 		end
 	end
