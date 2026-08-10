@@ -1,14 +1,15 @@
-function [temps , y] = euler_imp(f , tspan , Y0 , nb_pas)
-% EULER_IMP	Methode d'Euler implicite avec pas constant pour la
+function [temps , y] = crank_nic(f , tspan , Y0 , nb_pas, h_nl)
+% CRANK_NIC	Methode de Crank-Nicolson avec pas constant pour la
 %			resolution d'EDOs
 %
-% Syntaxe: [temps , y] = euler_imp(f , tspan , Y0 , nb_pas)
+% Syntaxe: [temps , y] = crank_nic(f , tspan , Y0 , nb_pas)
 %
 % Arguments d'entree
 %	f		-	String ou function handle definissant le systeme de N EDOs
 %	tspan	-	Vecteur contenant le temps initial et final [t0,tf]
 %	x0		-	Vecteur colonne contenant les N conditions initiales
 %	nb_pas	-	Nombre de pas de temps
+%	h_nl	-	(Optionnel) Pas h pour la resolution du systeme non-lineaire
 %
 % Arguments de sortie
 %	temps	-	Vecteur rangee contenant les valeurs de temps t_i
@@ -16,9 +17,9 @@ function [temps , y] = euler_imp(f , tspan , Y0 , nb_pas)
 %				sont les approximations de y_i(t)
 %
 % Exemples d'appel
-%	[temps , y] = euler_imp('my_edo' , [0,1] , [1;0] , 1000);
-%	[temps , y] = euler_imp(@(t,y) y*cos(t) , [0,2] , 1 , 1000 );
-%	[temps , y] = euler_imp(@(t,z) [z(2);-10*z(1)] , [0,1] , [1;0] , 1000);
+%	[temps , y] = crank_nic('my_edo' , [0,1] , [1;0] , 1000);
+%	[temps , y] = crank_nic(@(t,y) y*cos(t) , [0,2] , 1 , 1000 );
+%	[temps , y] = crank_nic(@(t,z) [z(2);-10*z(1)] , [0,1] , [1;0] , 1000, 1e-3);
 
 
 
@@ -38,6 +39,16 @@ elseif ~isscalar(nb_pas) || floor(nb_pas)~=nb_pas ...
 						  || length(nb_pas)~=1 || nb_pas<0
 	error('Le nombre de pas nb_pas doit etre entier et positif')
 end
+
+%% Verification du pas h_nl
+if nargin == 5
+	if ~isscalar(h_nl) || ~isfloat(h_nl) || h_nl <= 0
+		error('Le pas h_nl doit etre un scalaire positif');
+	end
+else
+	h_nl = 1e-3;
+end
+
 t0			=	tspan(1);
 tf			=	tspan(2);
 nb_pas		=	double(nb_pas);
@@ -69,10 +80,10 @@ temps		=	reshape(linspace(t0,tf,nb_pas+1),1,nb_pas+1);
 y			=	nan(length(Y0_col), nb_pas + 1);
 y(:,1)		=	Y0_col;
 
-%% Methode d'Euler implicite avec pas constant
+%% Methode Crank-Nicholson avec pas constant
 for t=1:nb_pas
-	fct_nl	=	@(x) x - y(:,t) - h*reshape(fct(temps(t+1),x),nb_comp,1); 
-	[approx , err_abs] = newton_ND_sans_der(fct_nl , y(:,t) , 20 , 1e-12);
+	fct_nl	=	@(x) x - y(:,t) - h/2*reshape(fct(temps(t),y(:,t)) + fct(temps(t+1),x),nb_comp,1); 
+	[approx , err_abs] = newton_ND_sans_der(fct_nl, h_nl, y(:,t) , 10 , 1e-9);
 	if isinf(err_abs(end))
 		warning('Probleme au temps %1.6e',temps(t+1))
 	end

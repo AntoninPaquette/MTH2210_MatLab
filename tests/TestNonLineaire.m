@@ -1,5 +1,5 @@
 classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
-        '../src')}) TestNonLineaire < matlab.unittest.TestCase
+        '../source')}) TestNonLineaire < matlab.unittest.TestCase
 	
 	properties (TestParameter)
 		% 2 fonctions avec leurs derivees et racines
@@ -111,7 +111,7 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 			racine_syst		=	[1;-2;5];		  
 			x0_syst	=	[1.5;-3;4];
 			
-			[app , err] = newton_ND_sans_der(fct_syst , x0_syst , 20 , 1e-12);
+			[app , err] = newton_ND_sans_der(fct_syst, 1e-3, x0_syst , 20 , 1e-12);
 			
 			verifyLessThan(testCase,norm(app(:,end)-reshape(racine_syst,[],1)),1e-11);
 			
@@ -145,7 +145,7 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 			% Robustesse face a l'orientation des vecteurs (rangee ou 
 			% colonne) pour les arguments d'entrees (sauf pour la matrice jacobienne) 
 					
-			[app , err] = newton_ND_sans_der(f_size, x0_size, 20, 1e-12);
+			[app , err] = newton_ND_sans_der(f_size, 1e-3, x0_size, 20, 1e-12);
 			
 			nb_iter		=	length(err);
 			
@@ -207,8 +207,8 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 		
 		function testNewton_ND_Sans_DerErrorFct(testCase)
 			% Verification message erreur pour fct
-			verifyError(testCase,@() newton_ND_sans_der(@f_not_present, [1;1] , 20 , 1e-12),"MATLAB:UndefinedFunction");
-			verifyError(testCase,@() newton_ND_sans_der(@fct_error, [1;1] , 20 , 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() newton_ND_sans_der(@f_not_present, 1e-3, [1;1] , 20 , 1e-12),"MATLAB:UndefinedFunction");
+			verifyError(testCase,@() newton_ND_sans_der(@fct_error, 1e-3, [1;1] , 20 , 1e-12),"MATLAB:UndefinedFunction");
 		end	
 	end
 	
