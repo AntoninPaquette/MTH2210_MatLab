@@ -1,5 +1,5 @@
 classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
-        '../src')}) TestEDO < matlab.unittest.TestCase
+        '../source')}) TestEDO < matlab.unittest.TestCase
 	
 	properties (TestParameter)
 		algo		=	{@euler_exp, @euler_imp, @euler_mod, @pt_milieu, @crank_nic, @rk4} 
@@ -90,7 +90,7 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 			erreur		=	nan(nb_eval,1);
 			
 			for t=1:nb_eval
-				[temps , y]	=	algo(fct ,tspan, y0, nb_pas(t));
+				[temps , y]	=	algo(fct, tspan, y0, nb_pas(t));
 				erreur(t)	=	norm(y - y_ex(temps),inf);
 			end
 			

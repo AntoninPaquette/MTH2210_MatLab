@@ -1,4 +1,4 @@
-function [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel , file_name)
+function [approx , err_abs] = newton_ND_sans_der(F, h, x0, nb_it_max , tol_rel , file_name)
 % NEWTON_ND_SANS_DER	Methode de Newton pour la resolution de F(x) = 0, pour F: R^n -> R^n
 %
 % Syntaxe: [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel , file_name)
@@ -6,6 +6,8 @@ function [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel , 
 % Arguments d'entree
 %	F			-	String ou fonction handle specifiant la fonction
 %					non-lineaire (F: R^n -> R^n)
+%	h			-	Pas h employé pour l'approximation de la matrice jacobienne 
+%					par des différences finies centrées d'ordre 2
 %	x0			-	Approximation initiale (x0 dans R^n)
 %	nb_it_max	-	Nombre maximum d'iterations 
 %	tol_rel		-	Tolerance sur l'approximation de l'erreur relative
@@ -19,8 +21,8 @@ function [approx , err_abs] = newton_ND_sans_der(F , x0 , nb_it_max , tol_rel , 
 %					erreurs absolues
 %
 % Exemples d'appel
-%	[ approx , err_abs ] = newton_ND_sans_der( 'my_sys_nl' , [1;1] , 20 , 1e-9 , 'resul_newtonND.txt')
-%	[ approx , err_abs ] = newton_ND_sans_der( @(x) [x(1)^2 + x(2)^2 - 1 ; -x(1)^2 + x(2)] , [1;1] , 20 , 1e-9 , 'resul_newtonND.txt')
+%	[ approx , err_abs ] = newton_ND_sans_der( 'my_sys_nl', 1e-3, [1;1] , 20 , 1e-9 , 'resul_newtonND.txt')
+%	[ approx , err_abs ] = newton_ND_sans_der( @(x) [x(1)^2 + x(2)^2 - 1 ; -x(1)^2 + x(2)], 1e-3, [1;1] , 20 , 1e-9 , 'resul_newtonND.txt')
 
 
 
@@ -33,6 +35,12 @@ elseif isa(F,'function_handle')
 	is_fct_file =	false;
 else
 	error('L''argument f n''est pas un string ni un function_handle')
+end
+
+
+%% Verification du pas h
+if ~isscalar(h) || ~isfloat(h) || h <= 0
+	error('Le pas h doit etre un scalaire positif');
 end
 
 
@@ -57,7 +65,7 @@ if ~isnumeric(fct(x0_col)) || ~isvector(fct(x0_col)) || (length(fct(x0_col))~=ta
 end
 
 %% Verification du fichier output
-if nargin == 5 && ~isa(file_name,'char')
+if nargin == 6 && ~isa(file_name,'char')
 	error('Le nom du fichier des resultats doit etre de type string')
 end
 
@@ -71,7 +79,7 @@ arret		=	false;
 %% Methode de Newton
 for t=1:nb_it_max-1
 	
-	app_jac		=	app_jacobienne(fct,app(:,t));
+	app_jac		=	app_jacobienne(fct, app(:,t), h);
 	delta_x		=	app_jac\-reshape(fct(app(:,t)),taille,1);
 	app(:,t+1)	=	app(:,t) + delta_x;
 	
@@ -108,7 +116,7 @@ else
 end
 
 % ecriture des resultats si fichier passe en argument
-if nargin == 5
+if nargin == 6
 	output_results(file_name , fct , is_fct_file , ...
 				nb_it_max , tol_rel , x0 , approx , err_abs , arret)
 end
@@ -116,14 +124,16 @@ end
 end
 
 
-function [app_finale] = app_jacobienne(f,x0)
+function [app_finale] = app_jacobienne(f, x0, h_init)
 
 	taille	=	length(x0);
-	if min(x0) == 0
-		h_init	=	1e-6;
-	else
-		h_init	=	1e-3 * min(x0);
-	end
+
+	% if min(x0) == 0
+	% 	h_init	=	1e-6;
+	% else
+	% 	h_init	=	1e-3 * min(x0);
+	% end
+
 	h		=	h_init./(2.^(0:1));
 	app		=	cell(2,1);
 	

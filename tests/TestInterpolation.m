@@ -1,5 +1,5 @@
 classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
-        '../src')}) TestInterpolation < matlab.unittest.TestCase
+        '../source')}) TestInterpolation < matlab.unittest.TestCase
 	
 	properties (TestParameter)
 		% Interpolation exacte de polynomes
@@ -39,7 +39,7 @@ classdef (SharedTestFixtures={matlab.unittest.fixtures.PathFixture( ...
 			% pente prescrite (4)
 			
 			xi	=	[0,1,3,4];
-			yi	=	spline_example2(xi);
+			yi	=	spline_example(xi);
 			x	=	linspace(1,4,1000);
 			y_exacte	=	spline_example(x);
 			
@@ -124,13 +124,6 @@ function [px] = spline_example(x)
 			(x>=3 & x<=4) .* (-5*x.^2 + 24*x - 26);
 end
 
-function [px] = spline_example2(x)
-	if min(x)<0 || max(x)>4
-		error("Pas dans le domaine de la fonction")
-	end
-	px =	(x>=0 & x<1) .* (x.^2) + (x>=1 & x<3) .* (-x.^3 + 4*x.^2 - 3*x + 1) + ...
-			(x>=3 & x<=4) .* (-5*x.^2 + 24*x - 26);
-end
 
 function [ordre,ordre_app] = order_computation(erreur,ratio_h,varargin)
 % Approximation de l'ordre de convergence
